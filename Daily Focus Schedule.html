@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Blocking Tool</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --handle-color: #cbd5e1;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px; 
+            height: 95vh;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        header {
+            padding: 15px 20px 15px 60px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            background: white;
+            z-index: 30;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 { margin: 0; font-size: 1.2rem; }
+        .header-left p { margin: 3px 0 0; color: var(--text-secondary); font-size: 0.8rem; }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background: #e2e8f0; color: var(--text-primary); }
+
+        /* SCROLL WRAPPER */
+        .track-wrapper {
+            flex-grow: 1;
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            position: relative;
+            scrollbar-width: thin;
+        }
+        .track-wrapper::-webkit-scrollbar { width: 6px; }
+        .track-wrapper::-webkit-scrollbar-thumb { background-color: #eee; border-radius: 3px;}
+
+        /* TRACK */
+        .track {
+            display: flex;
+            flex-direction: column;
+            /* Large left padding allows buttons to hang left without being cut off */
+            padding-left: 50px; 
+            padding-right: 10px;
+            /* Space at bottom for the last add button */
+            padding-bottom: 80px; 
+            position: relative;
+            height: 100%; 
+            min-height: min-content; 
+        }
+
+        .block {
+            position: relative;
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 36px; 
+            border-bottom: 1px solid white;
+            /* CRITICAL FIX: Removed overflow:hidden from parent so buttons can extend outside */
+            overflow: visible; 
+            transition: min-height 0.1s, background-color 0.2s;
+            z-index: 10;
+        }
+
+        /* Compact mode for small blocks (<= 25m) */
+        .block.compact {
+            min-height: 28px;
+            flex-direction: row; 
+            align-items: center;
+        }
+        .block.compact .block-content {
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+        }
+        .block.compact .time-col {
+            min-width: auto;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+        .block.compact .duration-sub {
+            margin-top: 0;
+            background: transparent;
+            font-weight: normal;
+            font-size: 0.75rem;
+            padding: 0;
+        }
+        .block.compact .duration-sub::before { content: '('; }
+        .block.compact .duration-sub::after { content: ')'; }
+
+        /* Color Coding */
+        .block:nth-child(4n+1) { background-color: #eef2ff; border-left: 4px solid #6366f1; }
+        .block:nth-child(4n+2) { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+        .block:nth-child(4n+3) { background-color: #fff7ed; border-left: 4px solid #f97316; }
+        .block:nth-child(4n+4) { background-color: #faf5ff; border-left: 4px solid #a855f7; }
+
+        .block-content {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 12px;
+            width: 100%;
+            /* Apply overflow hidden here instead, to prevent text squishing */
+            overflow: hidden; 
+        }
+
+        .time-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            min-width: 130px;
+            flex-shrink: 0;
+            user-select: none;
+            line-height: 1.1;
+        }
+
+        .time-row {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            gap: 4px;
+        }
+
+        .duration-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.05);
+            padding: 0px 5px;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
+        input.time-input {
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(255,255,255,0.5);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 0 2px;
+            width: 55px;
+            cursor: pointer;
+            text-align: center;
+        }
+        input.time-input:hover { border-color: var(--accent); background: white; }
+        input.time-input:focus { outline: none; background: white; border-color: var(--accent); }
+
+        .task-name {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            flex-grow: 1;
+            padding: 4px 8px;
+            cursor: text;
+            outline: none;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .task-name:focus { 
+            white-space: normal; 
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .controls {
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            transition: opacity 0.2s;
+            margin-left: 5px;
+        }
+        .block:hover .controls { opacity: 1; }
+        
+        .btn-icon {
+            border: none; background: rgba(255,255,255,0.6);
+            cursor: pointer; font-size: 9px; padding: 2px 5px; border-radius: 3px;
+        }
+        .btn-icon:hover { background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        /* SEAM & BUTTONS */
+        .seam-container {
+            position: absolute;
+            bottom: -8px; 
+            left: -40px; 
+            right: 0;
+            height: 16px; 
+            z-index: 20; 
+            display: flex;
+            align-items: center;
+            /* Ensures hover works even if parent has issues */
+            pointer-events: auto; 
+        }
+        
+        .seam-line {
+            margin-left: 40px;
+            flex-grow: 1;
+            height: 4px;
+            background-color: transparent;
+            transition: background-color 0.2s;
+            cursor: row-resize;
+        }
+        .seam-container:hover .seam-line { background-color: var(--handle-color); }
+        .seam-container:active .seam-line { background-color: var(--accent); }
+
+        .btn-add {
+            width: 24px; height: 24px;
+            background-color: var(--accent);
+            color: white; border-radius: 50%;
+            border: none; display: flex;
+            align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; font-weight: bold;
+            padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateX(10px) scale(0.8);
+            transition: all 0.2s ease;
+            position: absolute; left: 8px; z-index: 25;
+        }
+        .btn-add:hover { background-color: var(--accent-hover); transform: translateX(0) scale(1.1); }
+        /* Since .block overflow is visible now, these hovers work reliably */
+        .seam-container:hover .btn-add, .btn-add:hover { opacity: 1; transform: translateX(0) scale(1); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-left">
+            <h1>Daily Focus</h1>
+            <p>Plan your blocks (Min 15m)</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-action" onclick="saveSchedule()">Save</button>
+            <button class="btn-action" onclick="document.getElementById('fileInput').click()">Load</button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadSchedule(this)">
+        </div>
+    </header>
+    
+    <div class="track-wrapper">
+        <div id="track" class="track">
+            <!-- JS renders here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let startHour = 7;
+    let startMin = 0;
+    
+    let schedule = [
+        { title: "Wake up, Brush", duration: 15 },
+        { title: "Deep Work (Focus)", duration: 240 }, 
+        { title: "Lunch", duration: 75 },
+        { title: "Walk Outside", duration: 60 },
+        { title: "Deep Work (Focus)", duration: 240 },
+        { title: "Commute to Gym", duration: 30 },
+        { title: "Gym", duration: 90 },
+        { title: "Dinner", duration: 60 },
+        { title: "Wind Down (No Screens)", duration: 60 } 
+    ];
+
+    const track = document.getElementById('track');
+
+    function render() {
+        track.innerHTML = '';
+        
+        let currentTime = new Date();
+        currentTime.setHours(startHour, startMin, 0, 0);
+        
+        const totalMinutes = schedule.reduce((acc, curr) => acc + curr.duration, 0);
+
+        schedule.forEach((item, index) => {
+            const block = document.createElement('div');
+            block.classList.add('block');
+            
+            // Compact mode trigger
+            if (item.duration <= 25) block.classList.add('compact');
+
+            const startObj = new Date(currentTime);
+            const startVal = getInputValue(startObj); 
+            const startDisplay = formatTime(startObj); 
+            
+            currentTime.setMinutes(currentTime.getMinutes() + item.duration);
+            const endObj = new Date(currentTime);
+            const endVal = getInputValue(endObj);
+            const endDisplay = formatTime(endObj);
+
+            // Fit to screen logic
+            const heightPct = (item.duration / totalMinutes) * 100;
+            block.style.height = `${heightPct}%`; 
+            block.style.flexGrow = item.duration; 
+            block.style.flexShrink = 1; 
+
+            // --- HTML Generation ---
+            let sHtml = `<span class="t-span">${startDisplay}</span>`;
+            if (index === 0) {
+                sHtml = `<input type="time" class="time-input" value="${startVal}" onchange="updateGlobalStart(this.value)">`;
+            }
+
+            let eHtml = `<span class="t-span">${endDisplay}</span>`;
+            if (index === schedule.length - 1) {
+                eHtml = `<input type="time" class="time-input" value="${endVal}" onchange="updateGlobalEnd(this.value)">`;
+            }
+
+            const timeRowHtml = `${sHtml} <span style="font-size:0.8rem; margin:0 4px; color:#ccc;">—</span> ${eHtml}`;
+
+            let seamHtml = '';
+            
+            if (index < schedule.length - 1) {
+                seamHtml = `
+                    <div class="seam-container">
+                        <button class="btn-add" onclick="addBlock(${index})" title="Insert block">+</button>
+                        <div class="seam-line" onmousedown="startResize(event, ${index})"></div>
+                    </div>`;
+            } else {
+                seamHtml = `
+                    <div class="seam-container" style="bottom: -12px;">
+                        <button class="btn-add" onclick="addBlock(${index})" title="Append block">+</button>
+                        <div class="seam-line" onmousedown="startResizeEnd(event)"></div>
+                    </div>`;
+            }
+
+            block.innerHTML = `
+                <div class="block-content">
+                    <div class="time-col">
+                        <div class="time-row">${timeRowHtml}</div>
+                        <div class="duration-sub">${formatDuration(item.duration)}</div>
+                    </div>
+                    
+                    <div class="task-name" 
+                         contenteditable="true" 
+                         spellcheck="false"
+                         onblur="updateTaskName(${index}, this.innerText)" 
+                         onkeydown="handleEnter(event, this)">${item.title}</div>
+                    
+                    <div class="controls">
+                        ${index > 0 ? `<button class="btn-icon" onclick="moveBlock(${index}, -1)">▲</button>` : ''}
+                        ${index < schedule.length - 1 ? `<button class="btn-icon" onclick="moveBlock(${index}, 1)">▼</button>` : ''}
+                        <button class="btn-icon" style="color:#ef4444;" onclick="deleteBlock(${index})">×</button>
+                    </div>
+                </div>
+                ${seamHtml}
+            `;
+
+            track.appendChild(block);
+        });
+    }
+
+    // --- SAVE / LOAD ---
+    function saveSchedule() {
+        const data = { startHour, startMin, blocks: schedule };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "schedule.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function loadSchedule(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.blocks && Array.isArray(data.blocks)) {
+                    schedule = data.blocks;
+                    startHour = data.startHour ?? 7;
+                    startMin = data.startMin ?? 0;
+                    render();
+                } else { alert("Invalid file format"); }
+            } catch (err) { alert("Error reading file"); }
+        };
+        reader.readAsText(file);
+        input.value = '';
+    }
+
+    // --- LOGIC ---
+    window.updateGlobalStart = function(val) {
+        if(!val) return;
+        const [h, m] = val.split(':').map(Number);
+        startHour = h; startMin = m;
+        render();
+    };
+
+    window.updateGlobalEnd = function(val) {
+        if(!val) return;
+        const [h, m] = val.split(':').map(Number);
+        
+        let targetEndMins = h * 60 + m;
+        let startMins = startHour * 60 + startMin;
+        if (targetEndMins < startMins) targetEndMins += 24 * 60; 
+
+        let durationBefore = schedule.slice(0, -1).reduce((acc, c) => acc + c.duration, 0);
+        let newLast = targetEndMins - (startMins + durationBefore);
+        
+        if (newLast < 15) newLast = 15;
+        schedule[schedule.length - 1].duration = newLast;
+        render();
+    };
+
+    window.addBlock = function(index) {
+        schedule.splice(index + 1, 0, { title: "New Task", duration: 30 });
+        render();
+    };
+
+    window.deleteBlock = function(index) {
+        if(confirm("Remove this block?")) {
+            schedule.splice(index, 1);
+            render();
+        }
+    };
+
+    window.updateTaskName = function(idx, txt) { schedule[idx].title = txt; };
+    window.handleEnter = function(e, el) { if (e.key === 'Enter') { e.preventDefault(); el.blur(); }};
+    window.moveBlock = function(index, dir) {
+        if ((dir === -1 && index > 0) || (dir === 1 && index < schedule.length - 1)) {
+            const swapIdx = index + dir;
+            [schedule[index], schedule[swapIdx]] = [schedule[swapIdx], schedule[index]];
+            render();
+        }
+    };
+
+    // --- RESIZING ---
+    window.startResize = function(e, index) {
+        e.preventDefault();
+        const startY = e.clientY;
+        const trackHeight = track.getBoundingClientRect().height; 
+        const totalDuration = schedule.reduce((acc,c)=>acc+c.duration, 0);
+        
+        // Dynamic pixel ratio
+        const pixelsPerMinute = trackHeight / totalDuration;
+
+        const startDurCurrent = schedule[index].duration;
+        const startDurNext = schedule[index + 1].duration;
+
+        document.body.style.cursor = 'row-resize';
+        document.body.style.userSelect = 'none';
+
+        const onMouseMove = (ev) => {
+            const deltaY = ev.clientY - startY;
+            
+            // Safety: if track is collapsed (pixelsPerMinute close to 0), avoid Infinity
+            const ratio = pixelsPerMinute > 0.1 ? pixelsPerMinute : 1;
+            
+            const deltaMins = Math.round((deltaY / ratio) / 5) * 5;
+
+            let newDurCurrent = startDurCurrent + deltaMins;
+            let newDurNext = startDurNext - deltaMins;
+
+            if (newDurCurrent < 15) {
+                const diff = 15 - newDurCurrent;
+                newDurCurrent = 15;
+                newDurNext -= diff;
+            }
+            if (newDurNext < 15) {
+                const diff = 15 - newDurNext;
+                newDurNext = 15;
+                newDurCurrent -= diff;
+            }
+
+            schedule[index].duration = newDurCurrent;
+            schedule[index + 1].duration = newDurNext;
+            render();
+        };
+
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
+    window.startResizeEnd = function(e) {
+        e.preventDefault();
+        const startY = e.clientY;
+        const lastIdx = schedule.length - 1;
+        
+        const trackHeight = track.getBoundingClientRect().height; 
+        const totalDuration = schedule.reduce((acc,c)=>acc+c.duration, 0);
+        const pixelsPerMinute = trackHeight / totalDuration;
+
+        const startDur = schedule[lastIdx].duration;
+
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+
+        const onMouseMove = (ev) => {
+            const deltaY = ev.clientY - startY;
+            const ratio = pixelsPerMinute > 0.1 ? pixelsPerMinute : 1;
+            
+            let added = Math.round((deltaY / ratio) / 5) * 5;
+            let newDur = startDur + added;
+            
+            if (newDur < 15) newDur = 15;
+            schedule[lastIdx].duration = newDur;
+            render();
+        };
+
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
+    // --- FORMATTERS ---
+    function getInputValue(d) {
+        let h = d.getHours(), m = d.getMinutes();
+        return `${h<10?'0'+h:h}:${m<10?'0'+m:m}`;
+    }
+    function formatTime(d) {
+        let h = d.getHours(), m = d.getMinutes(), ap = h>=12?'pm':'am';
+        h = h%12||12; 
+        return `${h}:${m<10?'0'+m:m}${ap}`;
+    }
+    function formatDuration(m) {
+        if (m>=60) {
+            let hr = Math.floor(m/60), mn = m%60;
+            return mn>0 ? `${hr}h ${mn}m` : `${hr}h`;
+        }
+        return `${m}m`;
+    }
+
+    render();
+</script>
+</body>
+</html>
