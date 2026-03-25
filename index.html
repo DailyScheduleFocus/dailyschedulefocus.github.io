@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepTime | Premium UI</title>
+    <title>DeepTime</title>
+    
+    <!-- Clean, Inline SVG Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff8a80'/><circle cx='50' cy='50' r='24' fill='none' stroke='%23fff' stroke-width='8'/><path d='M50 35 v15 l10 10' fill='none' stroke='%23fff' stroke-width='8' stroke-linecap='round'/></svg>">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- HTML to Canvas library for the Screenshot Feature -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         /* --- Premium Color Palettes --- */
         :root {
@@ -39,7 +47,8 @@
         /* --- Accent Color Themes --- */
         [data-accent="blue"] { --primary: #60a5fa; --primary-hover: #3b82f6; --indicator: #60a5fa; }
         [data-accent="green"] { --primary: #34d399; --primary-hover: #10b981; --indicator: #34d399; }
-        [data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }[data-accent="gold"] { --primary: #fbbf24; --primary-hover: #f59e0b; --indicator: #fbbf24; }
+        [data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }
+        [data-accent="gold"] { --primary: #fbbf24; --primary-hover: #f59e0b; --indicator: #fbbf24; }
 
         /* --- Elegant Translucent Task Colors --- */
         .color-0 { --c-bg: rgba(59, 130, 246, 0.15); --c-border: #3b82f6; --c-text: #2563eb; }
@@ -47,12 +56,12 @@
         .color-2 { --c-bg: rgba(245, 158, 11, 0.15); --c-border: #f59e0b; --c-text: #d97706; }
         .color-3 { --c-bg: rgba(244, 63, 94, 0.15); --c-border: #f43f5e; --c-text: #e11d48; }
         .color-4 { --c-bg: rgba(139, 92, 246, 0.15); --c-border: #8b5cf6; --c-text: #7c3aed; }
-        .color-5 { --c-bg: rgba(255, 138, 128, 0.15); --c-border: #ff8a80; --c-text: #e06c64; }[data-theme="dark"] .color-0 { --c-text: #93c5fd; }
+        .color-5 { --c-bg: rgba(255, 138, 128, 0.15); --c-border: #ff8a80; --c-text: #e06c64; }
+        [data-theme="dark"] .color-0 { --c-text: #93c5fd; }
         [data-theme="dark"] .color-1 { --c-text: #6ee7b7; }
         [data-theme="dark"] .color-2 { --c-text: #fcd34d; }
         [data-theme="dark"] .color-3 { --c-text: #fda4af; }
-        [data-theme="dark"] .color-4 { --c-text: #c4b5fd; }
-        [data-theme="dark"] .color-5 { --c-text: #ffb5ad; }
+        [data-theme="dark"] .color-4 { --c-text: #c4b5fd; }[data-theme="dark"] .color-5 { --c-text: #ffb5ad; }
 
         /* --- Global & Scrollbars --- */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -149,7 +158,6 @@
         .month-cell { background: var(--bg-panel); padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
         .month-cell-date { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 5px; padding-left: 4px; }
         .month-event { background-color: var(--c-bg); color: var(--c-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border-left: 3px solid var(--c-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
-        .drag-over-active { background-color: rgba(128, 128, 128, 0.1) !important; }
 
         /* --- Modals --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
@@ -176,12 +184,10 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; }
         .status-dot.connected { background: #10b981; }
 
-        /* Accent Color Picker UI */
         .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
         .color-dot:hover { transform: scale(1.15); }
         .color-dot.active { border-color: var(--text-main); }
 
-        /* Subtasks UI */
         .subtask-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; max-height: 120px; overflow-y: auto;}
         .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; background: var(--bg-base); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);}
         .subtask-checkbox { width: 14px; min-width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
@@ -191,10 +197,21 @@
         .subtask-text.completed { text-decoration: line-through; opacity: 0.5; }
         .btn-subtask-delete { color: var(--indicator); font-size: 0.75rem; background: none; border: none; cursor: pointer; padding: 2px; }
         .subtask-badge { font-size: 0.65rem; background: var(--bg-panel); color: var(--text-main); padding: 2px 6px; border-radius: 4px; opacity: 0.8; margin-left: 6px; font-weight: 600;}
-
-        /* Custom Delete Modal Buttons */
         .delete-btn-choice { text-align: left; padding: 12px 16px; border-radius: 10px; width: 100%; display: block; background: var(--bg-panel); border: 1px solid var(--border); transition: 0.2s; cursor: pointer;}
         .delete-btn-choice:hover { border-color: var(--primary); background: var(--bg-base); }
+
+        /* --- Screenshot Export Classes --- */
+        #export-container { position: absolute; top: -9999px; left: -9999px; width: 420px; background: var(--bg-base); padding: 35px; border-radius: 20px; z-index: -1; font-family: 'Inter', sans-serif; color: var(--text-main); }
+        .exp-header-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
+        .exp-title { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+        .exp-brand { font-size: 0.9rem; font-weight: 700; color: var(--primary); }
+        .exp-item { display: flex; gap: 15px; margin-bottom: 12px; align-items: stretch;}
+        .exp-time-col { width: 75px; text-align: right; flex-shrink: 0; padding-top: 2px; }
+        .exp-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .exp-dur { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+        .exp-card { flex-grow: 1; background: var(--c-bg); border-left: 4px solid var(--c-border); padding: 12px 14px; border-radius: 10px; color: var(--c-text); box-shadow: var(--shadow); }
+        .exp-card-title { font-weight: 600; font-size: 0.9rem; line-height: 1.4; display: flex; justify-content: space-between;}
+        .exp-card-desc { font-size: 0.75rem; opacity: 0.8; font-weight: 500; margin-top: 6px; white-space: pre-wrap; line-height: 1.4;}
     </style>
 </head>
 <body>
@@ -223,6 +240,7 @@
                 <div style="width: 10px;"></div>
                 <button class="btn-outline" onclick="openRepeatingListModal()">🔁 Manage Repeating</button>
                 <button class="btn-outline" onclick="openShiftModal()" title="Shift Tasks Down">✨ Shift Schedule</button>
+                <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" title="Screenshot Day">📸 Screenshot</button>
                 <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
             </div>
         </div>
@@ -230,7 +248,28 @@
         <div class="view-container" id="view-container"></div>
     </div>
 
+    <!-- Hidden Export Container for Screenshots -->
+    <div id="export-container"></div>
+
     <!-- Modals -->
+    <!-- 0. Screenshot Modal -->
+    <div class="modal-overlay" id="screenshot-modal" style="z-index: 120;">
+        <div class="modal-content" style="width: 480px; text-align: center;">
+            <div class="modal-title">Day Screenshot Ready</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Your schedule is formatted and ready to share or save to your phone.</p>
+            
+            <div style="background: var(--bg-base); padding: 10px; border-radius: 12px; border: 1px solid var(--border); max-height: 40vh; overflow-y: auto; margin-bottom: 15px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);">
+                <img id="screenshot-img" style="width: 100%; border-radius: 8px; display: block;" />
+            </div>
+
+            <div class="modal-actions" style="justify-content: center; gap: 10px;">
+                <button class="btn-outline" style="border-color:transparent;" onclick="document.getElementById('screenshot-modal').classList.remove('active')">Close</button>
+                <button class="btn-outline" onclick="downloadScreenshot()">📥 Download</button>
+                <button class="btn-primary" onclick="copyScreenshot()">📋 Copy Image</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. Task Details Modal -->
     <div class="modal-overlay" id="task-modal">
         <div class="modal-content">
@@ -242,13 +281,11 @@
                 <input type="text" id="modal-title-input">
             </div>
 
-            <!-- Description -->
             <div class="form-group">
                 <label>Description & Notes</label>
                 <textarea id="modal-description" rows="2" placeholder="Add details, links, or notes..."></textarea>
             </div>
 
-            <!-- Subtasks -->
             <div class="form-group">
                 <label>Subtasks</label>
                 <div id="modal-subtask-list" class="subtask-list"></div>
@@ -401,6 +438,16 @@
 
             <div style="padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 600; font-size: 0.95rem;">Day Screenshot Button</span>
+                    <button class="btn-outline" id="settings-screenshot-btn" onclick="toggleScreenshotSetting()">Visible</button>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
+                    Enable a button on the main header to instantly capture a clean, vertical image of your day's schedule. Perfect for sending your agenda to your phone.
+                </p>
+            </div>
+
+            <div style="padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div style="font-weight: 600; font-size: 0.95rem;">Database Syncing</div>
                     <button class="btn-outline" onclick="connectDatabase()">📂 Link JSON File</button>
                 </div>
@@ -533,7 +580,7 @@
         function getSubtaskBadge(task) {
             if (!task.subtasks || task.subtasks.length === 0) return '';
             const completed = task.subtasks.filter(s => s.completed).length;
-            return `<span class="subtask-badge">✓ ${completed}/${task.subtasks.length}</span>`;
+            return `<span class="subtask-badge" style="background:var(--c-border); color:var(--bg-base);">✓ ${completed}/${task.subtasks.length}</span>`;
         }
 
         // --- 5. Navigation & Themes & Accents ---
@@ -579,6 +626,20 @@
             localStorage.setItem('akiflow_accent', colorName);
             document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
             document.querySelector(`.color-dot[data-color="${colorName}"]`).classList.add('active');
+        }
+
+        function updateScreenshotVisibility() {
+            const isHidden = localStorage.getItem('akiflow_hide_screenshot') === 'true';
+            const btn = document.getElementById('btn-screenshot');
+            if(btn) btn.style.display = isHidden ? 'none' : 'block';
+            
+            const setBtn = document.getElementById('settings-screenshot-btn');
+            if(setBtn) setBtn.innerText = isHidden ? 'Hidden' : 'Visible';
+        }
+        function toggleScreenshotSetting() {
+            const isHidden = localStorage.getItem('akiflow_hide_screenshot') === 'true';
+            localStorage.setItem('akiflow_hide_screenshot', isHidden ? 'false' : 'true');
+            updateScreenshotVisibility();
         }
 
         // --- 6. Infinite 365-Day Rolling Engine ---
@@ -630,11 +691,93 @@
             });
         }
 
-        // --- 7. Rendering ---
+        // --- 7. Screenshot Engine (html2canvas) ---
+        async function generateDayScreenshot() {
+            const todayStr = formatD(state.currentDate);
+            let todayEvents = state.events.filter(e => e.date === todayStr);
+            todayEvents.sort((a,b) => a.startMins - b.startMins);
+
+            const container = document.getElementById('export-container');
+            const displayDate = state.currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            
+            let html = `
+            <div class="exp-header-row">
+                <div>
+                    <div class="exp-title">${displayDate}</div>
+                </div>
+                <div class="exp-brand">DeepTime</div>
+            </div>`;
+            
+            if(todayEvents.length === 0) {
+                html += `<div style="color: var(--text-muted); font-size: 0.9rem; text-align:center; margin-top:20px;">No events scheduled for this day.</div>`;
+            } else {
+                todayEvents.forEach(ev => {
+                    const completedClass = ev.completed ? 'opacity: 0.5; text-decoration: line-through;' : '';
+                    html += `
+                    <div class="exp-item color-${ev.color}" style="${completedClass}">
+                        <div class="exp-time-col">
+                            <div class="exp-time">${formatTime(ev.startMins)}</div>
+                            <div class="exp-dur">${formatDurStr(ev.durationMins)}</div>
+                        </div>
+                        <div class="exp-card">
+                            <div class="exp-card-title">
+                                <span>${ev.text}</span>
+                                ${ev.completed ? '<span>✓</span>' : ''}
+                            </div>
+                            ${ev.description ? `<div class="exp-card-desc">${ev.description}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+            }
+            container.innerHTML = html;
+            
+            container.style.zIndex = '9999';
+            container.style.left = '0';
+            container.style.top = '0';
+
+            await new Promise(r => setTimeout(r, 100));
+
+            const canvas = await html2canvas(container, {
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-base').trim() || '#0a0a0a',
+                scale: 2 
+            });
+            
+            container.style.zIndex = '-1';
+            container.style.left = '-9999px';
+            container.style.top = '-9999px';
+
+            const imgData = canvas.toDataURL('image/png');
+            document.getElementById('screenshot-img').src = imgData;
+            
+            canvas.toBlob(blob => { window.currentScreenshotBlob = blob; });
+            document.getElementById('screenshot-modal').classList.add('active');
+        }
+
+        async function copyScreenshot() {
+            try {
+                await navigator.clipboard.write([ new ClipboardItem({ 'image/png': window.currentScreenshotBlob }) ]);
+                alert("Screenshot copied to clipboard!");
+            } catch (err) {
+                alert("Copy failed. Your browser might not support this feature. Try downloading instead.");
+            }
+        }
+
+        function downloadScreenshot() {
+            const url = URL.createObjectURL(window.currentScreenshotBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DeepTime_${formatD(state.currentDate)}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- 8. Rendering ---
         const viewContainer = document.getElementById('view-container');
         function renderAll() {
             maintainRepeats(); 
+            
             document.getElementById('date-picker').value = formatD(state.currentDate);
+            
             renderInbox();
             if (state.view === 'month') renderMonthView();
             else renderTimeGrid(state.view);
@@ -748,7 +891,7 @@
             viewContainer.appendChild(grid);
         }
 
-        // --- 8. Event Blocks & Resizing ---
+        // --- 9. Event Blocks & Resizing ---
         function createEventBlock(ev) {
             const el = document.createElement('div');
             el.className = `calendar-event color-${ev.color} ${ev.completed ? 'completed-task' : ''}`;
@@ -832,7 +975,7 @@
             if (columns.length > 0) columns.forEach((c, i) => c.forEach(e => { e.style.width = `calc(${100/columns.length}% - 8px)`; e.style.left = `calc(${(100/columns.length)*i}% + 4px)`; }));
         }
 
-        // --- 9. Drag and Drop ---
+        // --- 10. Drag and Drop ---
         let dragState = { source: null, id: null, offsetY: 0 };
         let isDragging = false;
 
@@ -904,7 +1047,7 @@
             });
         }
 
-        // --- 10. Inputs & Modals ---
+        // --- 11. Inputs & Modals ---
         document.getElementById('task-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && this.value.trim() !== '') {
                 state.inbox.push({ id: genId(), text: this.value.trim(), completed: false, color: Math.floor(Math.random() * 6), description: '', subtasks:[] });
@@ -1078,7 +1221,7 @@
             saveLocalData(); renderAll(); closeModals();
         }
 
-        // --- 11. Custom Deletion Rules ---
+        // --- 12. Custom Deletion Rules ---
         function deleteTask() {
             let task = currentEditingSource === 'inbox' ? state.inbox.find(t=>t.id===currentEditingId) : state.events.find(e=>e.id===currentEditingId);
             if(task.recurrenceId) { 
@@ -1134,7 +1277,7 @@
             if(!skipRender){ saveLocalData(); renderAll(); openRepeatingListModal(); }
         }
 
-        // --- 12. Secondary Modals ---
+        // --- 13. Secondary Modals ---
         function openRepeatingListModal() {
             const list = document.getElementById('recurring-list'); list.innerHTML = '';
             if(state.recurrences.length === 0) list.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">No repeating tasks found.</span>';
@@ -1187,6 +1330,8 @@
 
         const savedAccent = localStorage.getItem('akiflow_accent') || 'coral';
         setAccent(savedAccent);
+        
+        updateScreenshotVisibility();
         
         loadLocalData(); renderAll();
     </script>
