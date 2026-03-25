@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepTime</title>
     
-    <!-- Clean, Inline SVG Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff8a80'/><circle cx='50' cy='50' r='24' fill='none' stroke='%23fff' stroke-width='8'/><path d='M50 35 v15 l10 10' fill='none' stroke='%23fff' stroke-width='8' stroke-linecap='round'/></svg>">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Clean Built-in SVG Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff8a80'/><path d='M28 53 L42 66 L74 34' stroke='white' stroke-width='12' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     
-    <!-- HTML to Canvas library for the Screenshot Feature -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
@@ -135,7 +133,7 @@
         .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; transition: background 0.3s;}
         .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; transition: background 0.3s;}
 
-        /* --- Calendar Events --- */
+        /* --- Calendar Events & Smart Layouts --- */
         .calendar-event { position: absolute; background-color: var(--c-bg); border-left: 3px solid var(--c-border); border-radius: 6px; padding: 4px 8px; color: var(--c-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, border-color 0.2s; z-index: 5; display: flex; flex-direction: column;}
         .calendar-event:hover { border-color: var(--c-text); }
         .calendar-event:active { cursor: grabbing; z-index: 50 !important; }
@@ -146,6 +144,19 @@
         .event-title { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;}
         .event-desc { font-size: 0.7rem; opacity: 0.75; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; text-overflow: ellipsis; white-space: normal; word-wrap: break-word; line-height: 1.3; font-weight: 500;}
         
+        /* Layouts for small blocks */
+        .calendar-event.short-event { padding: 4px 8px; }
+        .calendar-event.short-event .event-header { margin-top: 0; align-items: center; }
+        .calendar-event.short-event .event-details { flex-direction: row; align-items: center; gap: 8px; }
+        .calendar-event.short-event .event-time { margin-bottom: 0; flex-shrink: 0; }
+        
+        .calendar-event.micro-event { padding: 2px 6px; border-left-width: 3px; }
+        .calendar-event.micro-event .event-header { margin-top: 0; align-items: center; gap: 6px; }
+        .calendar-event.micro-event .event-details { flex-direction: row; align-items: center; gap: 6px; }
+        .calendar-event.micro-event .event-time { font-size: 0.6rem; margin-bottom: 0; flex-shrink: 0; }
+        .calendar-event.micro-event .event-title { font-size: 0.75rem; }
+        .calendar-event.micro-event .task-checkbox { width: 12px; min-width: 12px; height: 12px; }
+
         .resizer { position: absolute; left: 0; right: 0; height: 12px; display: flex; justify-content: center; align-items: center; z-index: 10; }
         .resizer.bottom { bottom: -2px; cursor: ns-resize; }
         .resizer.top { top: -2px; cursor: ns-resize; }
@@ -158,6 +169,7 @@
         .month-cell { background: var(--bg-panel); padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
         .month-cell-date { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 5px; padding-left: 4px; }
         .month-event { background-color: var(--c-bg); color: var(--c-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border-left: 3px solid var(--c-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
+        .drag-over-active { background-color: rgba(128, 128, 128, 0.1) !important; }
 
         /* --- Modals --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
@@ -196,12 +208,13 @@
         .subtask-text { flex-grow: 1; outline: none; }
         .subtask-text.completed { text-decoration: line-through; opacity: 0.5; }
         .btn-subtask-delete { color: var(--indicator); font-size: 0.75rem; background: none; border: none; cursor: pointer; padding: 2px; }
-        .subtask-badge { font-size: 0.65rem; background: var(--bg-panel); color: var(--text-main); padding: 2px 6px; border-radius: 4px; opacity: 0.8; margin-left: 6px; font-weight: 600;}
+        .subtask-badge { font-size: 0.65rem; background: var(--c-border); color: var(--bg-base); padding: 2px 6px; border-radius: 4px; opacity: 0.9; margin-left: 6px; font-weight: 700;}
         .delete-btn-choice { text-align: left; padding: 12px 16px; border-radius: 10px; width: 100%; display: block; background: var(--bg-panel); border: 1px solid var(--border); transition: 0.2s; cursor: pointer;}
         .delete-btn-choice:hover { border-color: var(--primary); background: var(--bg-base); }
 
         /* --- Screenshot Export Classes --- */
-        #export-container { position: absolute; top: -9999px; left: -9999px; width: 420px; background: var(--bg-base); padding: 35px; border-radius: 20px; z-index: -1; font-family: 'Inter', sans-serif; color: var(--text-main); }
+        /* Removed border-radius to prevent white corner artifacts */
+        #export-container { position: absolute; top: -9999px; left: -9999px; width: 420px; background: var(--bg-base); padding: 35px; z-index: -1; font-family: 'Inter', sans-serif; color: var(--text-main); }
         .exp-header-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
         .exp-title { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
         .exp-brand { font-size: 0.9rem; font-weight: 700; color: var(--primary); }
@@ -240,7 +253,7 @@
                 <div style="width: 10px;"></div>
                 <button class="btn-outline" onclick="openRepeatingListModal()">🔁 Manage Repeating</button>
                 <button class="btn-outline" onclick="openShiftModal()" title="Shift Tasks Down">✨ Shift Schedule</button>
-                <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" title="Screenshot Day">📸 Screenshot</button>
+                <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" title="Screenshot Day" style="display:none;">📸 Screenshot</button>
                 <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
             </div>
         </div>
@@ -437,12 +450,12 @@
             </div>
 
             <div style="padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 600; font-size: 0.95rem;">Day Screenshot Button</span>
-                    <button class="btn-outline" id="settings-screenshot-btn" onclick="toggleScreenshotSetting()">Visible</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 600; font-size: 0.95rem;">Day Screenshot Tool</span>
+                    <input type="checkbox" id="settings-screenshot-toggle" onchange="toggleScreenshotBtn()" style="width:16px;height:16px;cursor:pointer;">
                 </div>
                 <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
-                    Enable a button on the main header to instantly capture a clean, vertical image of your day's schedule. Perfect for sending your agenda to your phone.
+                    Enable a button to export a clean, vertical image of your daily agenda. Perfect for sending your schedule to your phone.
                 </p>
             </div>
 
@@ -628,18 +641,10 @@
             document.querySelector(`.color-dot[data-color="${colorName}"]`).classList.add('active');
         }
 
-        function updateScreenshotVisibility() {
-            const isHidden = localStorage.getItem('akiflow_hide_screenshot') === 'true';
-            const btn = document.getElementById('btn-screenshot');
-            if(btn) btn.style.display = isHidden ? 'none' : 'block';
-            
-            const setBtn = document.getElementById('settings-screenshot-btn');
-            if(setBtn) setBtn.innerText = isHidden ? 'Hidden' : 'Visible';
-        }
-        function toggleScreenshotSetting() {
-            const isHidden = localStorage.getItem('akiflow_hide_screenshot') === 'true';
-            localStorage.setItem('akiflow_hide_screenshot', isHidden ? 'false' : 'true');
-            updateScreenshotVisibility();
+        function toggleScreenshotBtn() {
+            const isEnabled = document.getElementById('settings-screenshot-toggle').checked;
+            localStorage.setItem('akiflow_screenshot', isEnabled);
+            document.getElementById('btn-screenshot').style.display = isEnabled ? 'inline-block' : 'none';
         }
 
         // --- 6. Infinite 365-Day Rolling Engine ---
@@ -738,7 +743,7 @@
             await new Promise(r => setTimeout(r, 100));
 
             const canvas = await html2canvas(container, {
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-base').trim() || '#0a0a0a',
+                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-base').trim() || '#0a0a0a',
                 scale: 2 
             });
             
@@ -891,10 +896,16 @@
             viewContainer.appendChild(grid);
         }
 
-        // --- 9. Event Blocks & Resizing ---
+        // --- 9. Event Blocks & Resizing (With Smart Micro Layouts) ---
         function createEventBlock(ev) {
             const el = document.createElement('div');
-            el.className = `calendar-event color-${ev.color} ${ev.completed ? 'completed-task' : ''}`;
+            
+            // Smart Layout Classes based on duration
+            let sizeClass = '';
+            if (ev.durationMins <= 15) sizeClass = 'micro-event';
+            else if (ev.durationMins <= 30) sizeClass = 'short-event';
+
+            el.className = `calendar-event color-${ev.color} ${ev.completed ? 'completed-task' : ''} ${sizeClass}`;
             el.draggable = true;
             
             const topPos = ((ev.startMins - (START_HOUR * 60)) / 60) * HOUR_HEIGHT;
@@ -938,6 +949,11 @@
                             ev.durationMins = newDur;
                         }
                         
+                        // Switch responsive layout classes dynamically
+                        if (ev.durationMins <= 15) { el.classList.add('micro-event'); el.classList.remove('short-event'); } 
+                        else if (ev.durationMins <= 30) { el.classList.add('short-event'); el.classList.remove('micro-event'); } 
+                        else { el.classList.remove('short-event', 'micro-event'); }
+
                         el.style.top = (((ev.startMins - (START_HOUR * 60)) / 60) * HOUR_HEIGHT + HEADER_HEIGHT) + 'px';
                         el.style.height = ((ev.durationMins / 60) * HOUR_HEIGHT) + 'px';
                         
@@ -1330,8 +1346,10 @@
 
         const savedAccent = localStorage.getItem('akiflow_accent') || 'coral';
         setAccent(savedAccent);
-        
-        updateScreenshotVisibility();
+
+        const showScreenshot = localStorage.getItem('akiflow_screenshot') === 'true';
+        document.getElementById('settings-screenshot-toggle').checked = showScreenshot;
+        document.getElementById('btn-screenshot').style.display = showScreenshot ? 'inline-block' : 'none';
         
         loadLocalData(); renderAll();
     </script>
