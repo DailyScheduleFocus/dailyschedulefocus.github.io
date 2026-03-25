@@ -42,20 +42,27 @@
         }
 
         /* --- Accent Color Themes --- */
-        [data-accent="blue"] { --primary: #60a5fa; --primary-hover: #3b82f6; --indicator: #60a5fa; }[data-accent="green"] { --primary: #34d399; --primary-hover: #10b981; --indicator: #34d399; }[data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }
+        [data-accent="blue"] { --primary: #60a5fa; --primary-hover: #3b82f6; --indicator: #60a5fa; }
+        [data-accent="green"] { --primary: #34d399; --primary-hover: #10b981; --indicator: #34d399; }
+        [data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }
         [data-accent="gold"] { --primary: #fbbf24; --primary-hover: #f59e0b; --indicator: #fbbf24; }
 
-        /* --- Dynamic Colors (Translucent for Sidebar, Solid for Calendar) --- */
-        .color-0 { --c-trans-bg: rgba(59, 130, 246, 0.15); --c-solid-bg: #3b82f6; --c-trans-text: #2563eb; --c-solid-text: #ffffff; }
-        .color-1 { --c-trans-bg: rgba(16, 185, 129, 0.15); --c-solid-bg: #10b981; --c-trans-text: #059669; --c-solid-text: #ffffff; }
-        .color-2 { --c-trans-bg: rgba(245, 158, 11, 0.15); --c-solid-bg: #f59e0b; --c-trans-text: #d97706; --c-solid-text: #ffffff; }
-        .color-3 { --c-trans-bg: rgba(244, 63, 94, 0.15); --c-solid-bg: #f43f5e; --c-trans-text: #e11d48; --c-solid-text: #ffffff; }
-        .color-4 { --c-trans-bg: rgba(139, 92, 246, 0.15); --c-solid-bg: #8b5cf6; --c-trans-text: #7c3aed; --c-solid-text: #ffffff; }
-        .color-5 { --c-trans-bg: rgba(255, 138, 128, 0.15); --c-solid-bg: #ff8a80; --c-trans-text: #e06c64; --c-solid-text: #ffffff; }[data-theme="dark"] .color-0 { --c-trans-text: #93c5fd; --c-solid-bg: #2563eb; }[data-theme="dark"] .color-1 { --c-trans-text: #6ee7b7; --c-solid-bg: #059669; }
-        [data-theme="dark"] .color-2 { --c-trans-text: #fcd34d; --c-solid-bg: #d97706; }
-        [data-theme="dark"] .color-3 { --c-trans-text: #fda4af; --c-solid-bg: #e11d48; }[data-theme="dark"] .color-4 { --c-trans-text: #c4b5fd; --c-solid-bg: #7c3aed; }
-        [data-theme="dark"] .color-5 { --c-trans-text: #ffb5ad; --c-solid-bg: #e06c64; }
+        /* --- Elegant Translucent Task Colors --- */
+        .color-0 { --c-bg: rgba(59, 130, 246, 0.15); --c-border: #3b82f6; --c-text: #2563eb; }
+        .color-1 { --c-bg: rgba(16, 185, 129, 0.15); --c-border: #10b981; --c-text: #059669; }
+        .color-2 { --c-bg: rgba(245, 158, 11, 0.15); --c-border: #f59e0b; --c-text: #d97706; }
+        .color-3 { --c-bg: rgba(244, 63, 94, 0.15); --c-border: #f43f5e; --c-text: #e11d48; }
+        .color-4 { --c-bg: rgba(139, 92, 246, 0.15); --c-border: #8b5cf6; --c-text: #7c3aed; }
+        .color-5 { --c-bg: rgba(255, 138, 128, 0.15); --c-border: #ff8a80; --c-text: #e06c64; }
+        
+        [data-theme="dark"] .color-0 { --c-text: #93c5fd; }
+        [data-theme="dark"] .color-1 { --c-text: #6ee7b7; }
+        [data-theme="dark"] .color-2 { --c-text: #fcd34d; }
+        [data-theme="dark"] .color-3 { --c-text: #fda4af; }
+        [data-theme="dark"] .color-4 { --c-text: #c4b5fd; }
+        [data-theme="dark"] .color-5 { --c-text: #ffb5ad; }
 
+        /* --- Global & Scrollbars --- */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { display: flex; height: 100vh; background: var(--bg-base); color: var(--text-main); overflow: hidden; transition: background 0.3s, color 0.3s; }
         
@@ -84,19 +91,29 @@
         .inbox-list { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; position: relative;}
         .inbox-list:empty::before { content: "Your Unstructured Thoughts\A\ACapture tasks and thoughts as they come. Move them to your timeline when you're ready to schedule."; white-space: pre-wrap; text-align: center; color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 80px; line-height: 1.6; }
 
-        /* Sidebar Task Styling */
-        .inbox-task { background: var(--c-trans-bg); border: 1px solid transparent; border-left: 3px solid var(--c-solid-bg); padding: 12px 16px; border-radius: 10px; cursor: grab; font-size: 0.9rem; font-weight: 500; color: var(--c-trans-text); display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; position: relative; }
+        /* --- Task Cards Styling (Consistent for Sidebar & Calendar) --- */
+        .inbox-task, .calendar-event, .month-event, .exp-card { 
+            background: var(--c-bg); 
+            border-left: 3px solid var(--c-border); 
+            color: var(--c-text); 
+        }
+        
+        .inbox-task { padding: 12px 16px; border-radius: 10px; border-top: 1px solid transparent; border-right: 1px solid transparent; border-bottom: 1px solid transparent; cursor: grab; font-size: 0.9rem; font-weight: 500; display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; position: relative; }
         .inbox-task:active { cursor: grabbing; transform: scale(0.98); }
+        .inbox-task:hover { border-color: var(--border); border-left-color: var(--c-border); }
         .drag-over-sidebar { background-color: rgba(128, 128, 128, 0.1) !important; border: 1px dashed var(--primary) !important; border-radius: 16px;}
 
-        /* Sidebar Checkboxes */
-        .inbox-task .task-checkbox { min-width: 18px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--c-solid-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative;}
-        .inbox-task .task-checkbox:hover { opacity: 0.7; }
-        .inbox-task .task-checkbox.checked { background: var(--c-solid-bg); }
-        .inbox-task .task-checkbox.checked::after { content: '✓'; color: var(--bg-base); font-size: 10px; font-weight: 900; }
+        /* Unified Checkboxes */
+        .task-checkbox { min-width: 16px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--c-border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative;}
+        .task-checkbox:hover { opacity: 0.7; }
+        .task-checkbox.checked { background: var(--c-border); border-color: var(--c-border); }
+        .task-checkbox.checked::after { content: '✓'; color: var(--bg-base); font-size: 10px; font-weight: 900; }
         
         .task-text { flex-grow: 1; pointer-events: none; word-wrap: break-word; line-height: 1.4;}
         .completed-task .task-text { text-decoration: line-through; opacity: 0.5; }
+        
+        /* Subtask Badge */
+        .subtask-badge { font-size: 0.65rem; background: var(--c-border); color: var(--bg-base); padding: 2px 6px; border-radius: 4px; opacity: 0.9; margin-left: 6px; font-weight: 700;}
 
         /* --- Main Area & Header --- */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
@@ -128,9 +145,9 @@
         .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; transition: background 0.3s;}
         .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; transition: background 0.3s;}
 
-        /* --- Calendar Events (SOLID COLORS) --- */
-        .calendar-event { position: absolute; background-color: var(--c-solid-bg); border-radius: 6px; padding: 6px 8px; color: var(--c-solid-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, filter 0.2s; z-index: 5; display: flex; flex-direction: column;}
-        .calendar-event:hover { filter: brightness(1.1); }
+        /* --- Calendar Events --- */
+        .calendar-event { position: absolute; border-radius: 6px; padding: 4px 8px; overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, border-color 0.2s; z-index: 5; display: flex; flex-direction: column;}
+        .calendar-event:hover { border-color: var(--c-text); }
         .calendar-event:active { cursor: grabbing; z-index: 50 !important; }
         .calendar-event.completed-task { opacity: 0.6; }
         
@@ -139,16 +156,6 @@
         .event-time { font-size: 0.65rem; font-weight: 600; opacity: 0.8; margin-bottom: 2px; }
         .event-title { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;}
         .event-desc { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; text-overflow: ellipsis; white-space: normal; word-wrap: break-word; line-height: 1.3; font-weight: 500;}
-        
-        /* Solid block checkboxes */
-        .calendar-event .task-checkbox { min-width: 16px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative;}
-        .calendar-event .task-checkbox:hover { background: rgba(255,255,255,0.2); }
-        .calendar-event .task-checkbox.checked { background: #ffffff; border-color: #ffffff; }
-        .calendar-event .task-checkbox.checked::after { content: '✓'; color: var(--c-solid-bg); font-size: 10px; font-weight: 900; }
-
-        /* Subtask Badge */
-        .subtask-badge { font-size: 0.65rem; background: rgba(255,255,255,0.25); color: var(--c-solid-text); padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 700;}
-        .inbox-task .subtask-badge { background: var(--c-solid-bg); color: var(--bg-panel); }
 
         /* Layouts for small blocks */
         .calendar-event.short-event { padding: 4px 8px; }
@@ -161,24 +168,22 @@
         .calendar-event.micro-event .event-details { flex-direction: row; align-items: center; gap: 6px; }
         .calendar-event.micro-event .event-time { font-size: 0.6rem; margin-bottom: 0; flex-shrink: 0; }
         .calendar-event.micro-event .event-title { font-size: 0.75rem; }
-        .calendar-event.micro-event .task-checkbox { width: 12px; min-width: 12px; height: 12px; }
+        .calendar-event.micro-event .task-checkbox { width: 14px; min-width: 14px; height: 14px; }
         .calendar-event.micro-event .subtask-badge { display: none; }
 
         /* Resizers */
         .resizer { position: absolute; left: 0; right: 0; height: 12px; display: flex; justify-content: center; align-items: center; z-index: 10; }
         .resizer.bottom { bottom: -4px; cursor: ns-resize; }
         .resizer.top { top: -4px; cursor: ns-resize; }
-        .resizer::after { content: ''; width: 30px; height: 4px; background-color: rgba(255,255,255,0.7); border-radius: 2px; opacity: 0; transition: 0.2s;}
-        .calendar-event:hover .resizer::after { opacity: 1; }
+        .resizer::after { content: ''; width: 30px; height: 4px; background-color: var(--c-border); border-radius: 2px; opacity: 0; transition: 0.2s;}
+        .calendar-event:hover .resizer::after { opacity: 0.8; }
 
         /* --- Month View --- */
         .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(110px, 1fr); flex-grow: 1; background: var(--border); gap: 1px; }
         .month-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-panel); text-align: center; font-weight: 500; font-size: 0.85rem; padding: 15px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
         .month-cell { background: var(--bg-panel); padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
         .month-cell-date { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 5px; padding-left: 4px; }
-        .month-event { background-color: var(--c-solid-bg); color: var(--c-solid-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
-        .month-event .task-checkbox { min-width: 12px; width: 12px; height: 12px; border: 1px solid rgba(255,255,255,0.7); border-radius: 50%; }
-        .month-event .task-checkbox.checked { background: white; }
+        .month-event { font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
         .drag-over-active { background-color: rgba(128, 128, 128, 0.1) !important; }
 
         /* --- Modals --- */
@@ -234,7 +239,7 @@
         .exp-time-col { width: 75px; text-align: right; flex-shrink: 0; padding-top: 2px; }
         .exp-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
         .exp-dur { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-        .exp-card { flex-grow: 1; background: var(--c-solid-bg); padding: 12px 14px; border-radius: 10px; color: var(--c-solid-text); box-shadow: var(--shadow); }
+        .exp-card { flex-grow: 1; border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); }
         .exp-card-title { font-weight: 600; font-size: 0.9rem; line-height: 1.4; display: flex; justify-content: space-between;}
         .exp-card-desc { font-size: 0.75rem; opacity: 0.85; font-weight: 500; margin-top: 6px; white-space: pre-wrap; line-height: 1.4;}
     </style>
@@ -264,7 +269,7 @@
                 </div>
                 <div style="width: 10px;"></div>
                 <button class="btn-outline" onclick="openRepeatingListModal()">🔁 Manage Repeating</button>
-                <button class="btn-outline" onclick="openShiftModal()">✨ Shift Schedule</button>
+                <button class="btn-outline" onclick="openShiftModal()" title="Shift Tasks">✨ Shift Schedule</button>
                 <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" style="display:none;">📸 Screenshot</button>
                 <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
             </div>
@@ -440,8 +445,8 @@
     <!-- 3. Shift Schedule Modal -->
     <div class="modal-overlay" id="shift-modal">
         <div class="modal-content" style="width: 360px;">
-            <div class="modal-title">Shift Day</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; line-height:1.4;">Enter a new start time. All uncompleted tasks for today will be pushed up or down.</p>
+            <div class="modal-title">Shift Schedule</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; line-height:1.4;">Enter a new start time. All uncompleted tasks for today will be pushed up or down to fit.</p>
             <div class="form-group" style="margin-top:10px;">
                 <label>Start Day At</label>
                 <input type="time" id="shift-time-input">
@@ -464,7 +469,7 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
-                <span style="font-weight: 600; font-size: 0.95rem;">Accent Theme</span>
+                <span style="font-weight: 600; font-size: 0.95rem;">Accent Color Theme</span>
                 <div style="display: flex; gap: 10px;" id="accent-picker">
                     <div class="color-dot" data-color="coral" style="background: #ff8a80;" onclick="setAccent('coral')"></div>
                     <div class="color-dot" data-color="blue" style="background: #60a5fa;" onclick="setAccent('blue')"></div>
@@ -494,7 +499,7 @@
                     <span id="db-text">Syncing to Browser Memory</span>
                 </div>
                 <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
-                    Right now, tasks are safely stored in your browser memory. To backup permanently or sync cleanly across browsers, link a `.json` file on your PC.
+                    Right now, your tasks are safely stored in your browser's local memory. If you want to backup your data permanently or sync cleanly across different browsers, click the button above to link a `.json` database file on your PC.
                 </p>
             </div>
 
@@ -718,7 +723,6 @@
                             }
                         }
                     } else {
-                        // Calendar
                         let exists = state.events.some(e => e.recurrenceId === rule.id && e.date === dStr);
                         if (!exists) {
                             state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
@@ -787,7 +791,7 @@
                 const btn = document.getElementById('btn-copy-screenshot');
                 btn.innerHTML = '✅ Copied!';
                 setTimeout(() => { btn.innerHTML = '📋 Copy Image'; }, 2000);
-            } catch (err) { alert("Copy failed. Try downloading instead."); }
+            } catch (err) { alert("Copy failed. Your browser might not support this feature. Try downloading instead."); }
         }
 
         function downloadScreenshot() {
@@ -1204,7 +1208,6 @@
             toggleModalLocation(); toggleRepeatBox();
             document.getElementById('repeating-list-modal').classList.remove('active'); 
             document.getElementById('task-modal').classList.add('active');
-            document.getElementById('modal-title-input').focus();
         }
 
         function toggleModalLocation() { 
@@ -1348,6 +1351,16 @@
                 list.appendChild(el);
             });
             document.getElementById('repeating-list-modal').classList.add('active');
+        }
+
+        function editRecurringRule(ruleId) {
+            let ev = state.events.find(e => e.recurrenceId === ruleId);
+            if(ev) openTaskModal(ev.id, 'calendar');
+            else {
+                let inboxTask = state.inbox.find(t => t.recurrenceId === ruleId);
+                if(inboxTask) openTaskModal(inboxTask.id, 'inbox');
+                else alert("Could not find an active instance of this task to edit.");
+            }
         }
 
         function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
