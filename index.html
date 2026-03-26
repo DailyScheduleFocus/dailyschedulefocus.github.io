@@ -64,9 +64,14 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
+        /* --- Custom Ranges (Sliders) --- */
+        input[type=range] { -webkit-appearance: none; background: var(--border); height: 6px; border-radius: 3px; outline: none; padding: 0; border: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: 0.2s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
         /* --- UI Controls --- */
         button { cursor: pointer; border: none; background: none; font-size: 0.9rem; color: var(--text-main); transition: 0.15s; font-weight: 500; }
-        input, select, textarea { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
+        input[type=text], input[type=number], input[type=time], input[type=date], select, textarea { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); }
         textarea { resize: vertical; line-height: 1.4; }
         
@@ -85,7 +90,7 @@
         .inbox-list { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; position: relative;}
         .inbox-list:empty::before { content: "Your Unstructured Thoughts\A\ACapture tasks and thoughts as they come. Move them to your timeline when you're ready to schedule."; white-space: pre-wrap; text-align: center; color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 80px; line-height: 1.6; }
 
-        /* --- Task Cards --- */
+        /* Sidebar Task Styling */
         .inbox-task { background: var(--c-trans-bg); border: 1px solid transparent; border-left: 3px solid var(--c-solid-bg); padding: 12px 16px; border-radius: 10px; cursor: grab; font-size: 0.9rem; font-weight: 500; color: var(--c-trans-text); display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; position: relative; }
         .inbox-task:active { cursor: grabbing; transform: scale(0.98); }
         .inbox-task:hover { border-color: var(--border); }
@@ -122,19 +127,19 @@
         .time-col { width: 80px; min-width: 80px; position: relative; z-index: 2; border-right: 1px solid var(--border); }
         .time-label { position: absolute; right: 15px; font-size: 0.7rem; color: var(--text-muted); transform: translateY(-50%); font-weight: 500; letter-spacing: 0.5px;}
         
-        .day-cols-wrapper { display: flex; flex-grow: 1; position: relative; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px); background-size: 100% 60px; background-position: 0 60px; }
+        .day-cols-wrapper { display: flex; flex-grow: 1; position: relative; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px); }
         .day-col { flex: 1; border-right: 1px solid var(--border); position: relative; min-width: 120px; }
         .day-col:last-child { border-right: none; }
         
         .day-header { height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); background: var(--bg-panel); position: sticky; top: 0; z-index: 10; font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
         .day-header-sub { font-weight: 400; color: var(--text-muted); font-size: 0.85rem; margin-right: 8px; }
         
-        .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; }
-        .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; }
+        .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; transition: background 0.3s;}
+        .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; transition: background 0.3s;}
 
         /* --- Calendar Events --- */
-        .calendar-event { position: absolute; background-color: var(--c-trans-bg); border-left: 3px solid var(--c-solid-bg); border-radius: 6px; padding: 4px 8px; color: var(--c-trans-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, border-color 0.2s; z-index: 5; display: flex; flex-direction: column;}
-        .calendar-event:hover { border-color: var(--c-solid-bg); }
+        .calendar-event { position: absolute; background-color: var(--c-solid-bg); border-radius: 6px; padding: 6px 8px; color: var(--c-solid-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, filter 0.2s; z-index: 5; display: flex; flex-direction: column;}
+        .calendar-event:hover { filter: brightness(1.1); }
         .calendar-event:active { cursor: grabbing; z-index: 50 !important; }
         .calendar-event.completed-task { opacity: 0.6; }
         
@@ -143,8 +148,14 @@
         .event-time { font-size: 0.65rem; font-weight: 600; opacity: 0.8; margin-bottom: 2px; }
         .event-title { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;}
         .event-desc { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; text-overflow: ellipsis; white-space: normal; word-wrap: break-word; line-height: 1.3; font-weight: 500;}
+        
+        /* Solid block checkboxes */
+        .calendar-event .task-checkbox { min-width: 16px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative;}
+        .calendar-event .task-checkbox:hover { background: rgba(255,255,255,0.2); }
+        .calendar-event .task-checkbox.checked { background: #ffffff; border-color: #ffffff; }
+        .calendar-event .task-checkbox.checked::after { content: '✓'; color: var(--c-solid-bg); font-size: 10px; font-weight: 900; }
 
-        /* Layouts for small blocks */
+        /* Responsive Layouts based on actual PIXEL height */
         .calendar-event.short-event { padding: 4px 8px; }
         .calendar-event.short-event .event-header { margin-top: 0; align-items: center; }
         .calendar-event.short-event .event-details { flex-direction: row; align-items: center; gap: 8px; }
@@ -162,17 +173,17 @@
         .resizer { position: absolute; left: 0; right: 0; height: 12px; display: flex; justify-content: center; align-items: center; z-index: 10; }
         .resizer.bottom { bottom: -4px; cursor: ns-resize; }
         .resizer.top { top: -4px; cursor: ns-resize; }
-        .resizer::after { content: ''; width: 30px; height: 4px; background-color: var(--c-solid-bg); border-radius: 2px; opacity: 0; transition: 0.2s;}
-        .calendar-event:hover .resizer::after { opacity: 0.6; }
+        .resizer::after { content: ''; width: 30px; height: 4px; background-color: rgba(255,255,255,0.7); border-radius: 2px; opacity: 0; transition: 0.2s;}
+        .calendar-event:hover .resizer::after { opacity: 1; }
 
         /* --- Month View --- */
         .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(110px, 1fr); flex-grow: 1; background: var(--border); gap: 1px; }
         .month-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-panel); text-align: center; font-weight: 500; font-size: 0.85rem; padding: 15px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
         .month-cell { background: var(--bg-panel); padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
         .month-cell-date { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 5px; padding-left: 4px; }
-        .month-event { background-color: var(--c-trans-bg); color: var(--c-trans-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border-left: 3px solid var(--c-solid-bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
-        .month-event .task-checkbox { min-width: 12px; width: 12px; height: 12px; border: 1px solid var(--c-solid-bg); border-radius: 50%; }
-        .month-event .task-checkbox.checked { background: var(--c-solid-bg); }
+        .month-event { background-color: var(--c-solid-bg); color: var(--c-solid-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
+        .month-event .task-checkbox { min-width: 12px; width: 12px; height: 12px; border: 1px solid rgba(255,255,255,0.7); border-radius: 50%; }
+        .month-event .task-checkbox.checked { background: white; }
         .drag-over-active { background-color: rgba(128, 128, 128, 0.1) !important; }
 
         /* --- Modals --- */
@@ -187,6 +198,7 @@
         
         .row { display: flex; gap: 12px; align-items: flex-start; }
         .row > * { flex: 1; }
+        
         .modal-actions { display: flex; justify-content: space-between; margin-top: 10px; }
         
         .repeat-box { background: var(--bg-base); padding: 15px; border-radius: 10px; border: 1px solid var(--border); display: none; flex-direction: column; gap: 12px;}
@@ -228,7 +240,7 @@
         .exp-time-col { width: 75px; text-align: right; flex-shrink: 0; padding-top: 2px; }
         .exp-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
         .exp-dur { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-        .exp-card { flex-grow: 1; background: var(--c-trans-bg); border-left: 4px solid var(--c-solid-bg); padding: 12px 14px; border-radius: 10px; color: var(--c-trans-text); box-shadow: var(--shadow); }
+        .exp-card { flex-grow: 1; background: var(--c-solid-bg); padding: 12px 14px; border-radius: 10px; color: var(--c-solid-text); box-shadow: var(--shadow); }
         .exp-card-title { font-weight: 600; font-size: 0.9rem; line-height: 1.4; display: flex; justify-content: space-between;}
         .exp-card-desc { font-size: 0.75rem; opacity: 0.85; font-weight: 500; margin-top: 6px; white-space: pre-wrap; line-height: 1.4;}
     </style>
@@ -257,8 +269,12 @@
                     <button class="view-btn" onclick="setView('month')" id="btn-month">Month</button>
                 </div>
                 <div style="width: 10px;"></div>
+                
+                <!-- Main Zoom Slider -->
+                <input type="range" id="main-zoom-slider" min="40" max="240" step="10" oninput="updateZoom(this.value)" style="display:none; width: 80px;" title="Vertical Zoom">
+                
                 <button class="btn-outline" onclick="openRepeatingListModal()">🔁 Manage Repeating</button>
-                <button class="btn-outline" onclick="openShiftModal()" title="Shift Tasks Down">✨ Shift Schedule</button>
+                <button class="btn-outline" onclick="openShiftModal()">✨ Shift Schedule</button>
                 <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" style="display:none;">📸 Screenshot</button>
                 <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
             </div>
@@ -435,7 +451,7 @@
     <div class="modal-overlay" id="shift-modal">
         <div class="modal-content" style="width: 360px;">
             <div class="modal-title">Shift Day</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; line-height:1.4;">Enter a new start time. Uncompleted tasks for today will be pushed up or down.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; line-height:1.4;">Enter a new start time. All uncompleted tasks for today will be pushed up or down.</p>
             <div class="form-group" style="margin-top:10px;">
                 <label>Start Day At</label>
                 <input type="time" id="shift-time-input">
@@ -470,6 +486,17 @@
 
             <div style="padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 600; font-size: 0.95rem;">Vertical Zoom (Scale)</span>
+                    <input type="range" id="settings-zoom-slider" min="40" max="240" step="10" oninput="updateZoom(this.value)">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Show scale slider in main header</span>
+                    <input type="checkbox" id="settings-show-zoom" onchange="toggleMainZoomSlider()" style="width:16px;height:16px;cursor:pointer;">
+                </div>
+            </div>
+
+            <div style="padding: 20px 0 10px 0; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <span style="font-weight: 600; font-size: 0.95rem;">Day Screenshot Tool</span>
                     <input type="checkbox" id="settings-screenshot-toggle" onchange="toggleScreenshotBtn()" style="width:16px;height:16px;cursor:pointer;">
                 </div>
@@ -488,7 +515,7 @@
                     <span id="db-text">Syncing to Browser Memory</span>
                 </div>
                 <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
-                    Right now, tasks are safely stored in your browser memory. To backup permanently or sync cleanly across browsers, link a `.json` file on your PC.
+                    Right now, your tasks are safely stored in your browser's local memory. If you want to backup your data permanently or sync cleanly across different browsers, click the button above to link a `.json` database file on your PC.
                 </p>
             </div>
 
@@ -504,13 +531,11 @@
 
     <script>
         // --- 1. Constants & State ---
-        const HOUR_HEIGHT = 60; 
+        let HOUR_HEIGHT = parseInt(localStorage.getItem('akiflow_zoom')) || 60; 
         const HEADER_HEIGHT = 60; 
         const SNAP_MINS = 15;
-        const SNAP_PX = (SNAP_MINS / 60) * HOUR_HEIGHT;
         const START_HOUR = 0; 
         const END_HOUR = 23;  
-        const TOTAL_GRID_HEIGHT = (END_HOUR - START_HOUR + 1) * HOUR_HEIGHT; 
 
         let state = {
             view: 'day', 
@@ -617,20 +642,35 @@
             saveLocalData(); closeModals(); renderAll();
         }
 
-        // --- 4. Navigation & Themes ---
-        function jumpToDate(val) { if(!val) return; let[y,m,d] = val.split('-'); state.currentDate = new Date(y, m-1, d); renderAll(); }
+        // --- 4. Navigation & Zoom & Themes ---
+        function jumpToDate(val) { if(!val) return; let[y,m,d] = val.split('-'); state.currentDate = new Date(y, m-1, d); window.lastScrolledView = null; renderAll(); }
         function changeDate(days) {
             if (state.view === 'month') state.currentDate.setMonth(state.currentDate.getMonth() + days);
             else if (state.view === 'week') state.currentDate.setDate(state.currentDate.getDate() + (days * 7));
             else state.currentDate.setDate(state.currentDate.getDate() + days);
+            window.lastScrolledView = null;
             renderAll();
         }
-        function goToday() { state.currentDate = new Date(); renderAll(); }
+        function goToday() { state.currentDate = new Date(); window.lastScrolledView = null; renderAll(); }
         function setView(view) {
             state.view = view;
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${view}`).classList.add('active');
             renderAll();
+        }
+
+        function updateZoom(val) {
+            HOUR_HEIGHT = parseInt(val);
+            localStorage.setItem('akiflow_zoom', HOUR_HEIGHT);
+            document.getElementById('settings-zoom-slider').value = HOUR_HEIGHT;
+            document.getElementById('main-zoom-slider').value = HOUR_HEIGHT;
+            if(state.view !== 'month') renderTimeGrid(state.view);
+        }
+
+        function toggleMainZoomSlider() {
+            const isEnabled = document.getElementById('settings-show-zoom').checked;
+            localStorage.setItem('akiflow_show_zoom', isEnabled);
+            document.getElementById('main-zoom-slider').style.display = isEnabled ? 'inline-block' : 'none';
         }
         
         function updateThemeToggleText() {
@@ -658,16 +698,16 @@
             document.getElementById('btn-screenshot').style.display = isEnabled ? 'inline-block' : 'none';
         }
 
-        // --- 5. Repeating Engine (Smart Horizon & History Preserving) ---
+        // --- 5. Repeating Engine (Smart Horizon) ---
         function maintainRepeats() {
             const todayStr = formatD(new Date());
             const horizonDate = new Date(); horizonDate.setDate(horizonDate.getDate() + 365);
             const horizonStr = formatD(horizonDate);
 
             state.recurrences.forEach(rule => {
-                const freshSubtasks = (rule.subtasks ||[]).map(s => ({ ...s, completed: false }));
+                const freshSubtasks = (rule.subtasks ||[]).map(s => ({ ...s, completed: false })); 
 
-                if (rule.target === 'sidebar') {
+                if(rule.target === 'sidebar') {
                     if (!rule.lastGeneratedDate) rule.lastGeneratedDate = todayStr;
                     let[y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
                     let nextDate = new Date(y, m - 1, d);
@@ -679,48 +719,28 @@
                     const nextDateStr = formatD(nextDate);
                     const hasActive = state.inbox.some(t => t.recurrenceId === rule.id && !t.completed) || state.events.some(e => e.recurrenceId === rule.id && !e.completed);
 
-                    // Waits until exactly the interval passes. Doesn't overwrite past.
                     if (todayStr >= nextDateStr && !hasActive) {
                         state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: todayStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
-                        rule.lastGeneratedDate = todayStr;
+                        rule.lastGeneratedDate = todayStr; 
+                    } else if (todayStr === rule.lastGeneratedDate && !hasActive) {
+                        state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: todayStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
                     }
-                } else if (rule.target === 'calendar') {
-                    if (!rule.lastGeneratedDate) rule.lastGeneratedDate = rule.startDate || todayStr;
-                    let [y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
-                    let lastGenDate = new Date(y, m - 1, d);
+                } else if(rule.target === 'calendar') {
+                    if(!rule.lastGeneratedDate) rule.lastGeneratedDate = todayStr;
+                    let[y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
+                    let lastGenDate = new Date(y, m - 1, d); 
 
-                    let iterations = 0;
-                    // Generates one by one up to 365 days in future.
-                    while (formatD(lastGenDate) < horizonStr && iterations < 400) {
-                        lastGenDate.setDate(lastGenDate.getDate() + 1); 
+                    let iterations = 0; 
+                    while(formatD(lastGenDate) < horizonStr && iterations < 400) {
+                        if(rule.frequency === 'days') lastGenDate.setDate(lastGenDate.getDate() + rule.interval);
+                        else if(rule.frequency === 'weeks') lastGenDate.setDate(lastGenDate.getDate() + (rule.interval * 7));
+                        else if(rule.frequency === 'months') lastGenDate.setMonth(lastGenDate.getMonth() + rule.interval);
+
                         let dStr = formatD(lastGenDate);
-                        if (dStr > horizonStr) break;
-
-                        let isMatch = false;
-
-                        if (rule.frequency === 'days') {
-                            let start = new Date(rule.startDate);
-                            let diffDays = Math.round((lastGenDate - start) / (1000 * 60 * 60 * 24));
-                            if (diffDays % rule.interval === 0) isMatch = true;
-                        } else if (rule.frequency === 'weeks') {
-                            let start = new Date(rule.startDate);
-                            let startWeek = new Date(start); startWeek.setDate(start.getDate() - start.getDay());
-                            let currentWeek = new Date(lastGenDate); currentWeek.setDate(lastGenDate.getDate() - lastGenDate.getDay());
-                            
-                            let diffWeeks = Math.round((currentWeek - startWeek) / (1000 * 60 * 60 * 24 * 7));
-                            if (diffWeeks % rule.interval === 0) {
-                                if (rule.daysOfWeek && rule.daysOfWeek.includes(lastGenDate.getDay())) isMatch = true;
-                            }
-                        } else if (rule.frequency === 'months') {
-                            let start = new Date(rule.startDate);
-                            let diffMonths = (lastGenDate.getFullYear() - start.getFullYear()) * 12 + (lastGenDate.getMonth() - start.getMonth());
-                            if (diffMonths % rule.interval === 0 && lastGenDate.getDate() === start.getDate()) isMatch = true;
-                        }
-
-                        if (isMatch) {
+                        if(dStr <= horizonStr) {
                             state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
+                            rule.lastGeneratedDate = dStr;
                         }
-                        rule.lastGeneratedDate = dStr; 
                         iterations++;
                     }
                 }
@@ -768,7 +788,7 @@
             await new Promise(r => setTimeout(r, 100));
 
             const canvas = await html2canvas(container, {
-                backgroundColor: null, // Transparent/No forced background so it doesn't leave white borders
+                backgroundColor: null, 
                 scale: 2 
             });
             
@@ -833,7 +853,8 @@
             viewContainer.innerHTML = '';
             const gridLayout = document.createElement('div');
             gridLayout.className = 'grid-layout';
-            gridLayout.style.height = TOTAL_GRID_HEIGHT + 'px'; 
+            const totalGridPx = (END_HOUR - START_HOUR + 1) * HOUR_HEIGHT;
+            gridLayout.style.height = totalGridPx + 'px'; 
 
             const timeCol = document.createElement('div'); timeCol.className = 'time-col';
             for (let i = START_HOUR; i <= END_HOUR; i++) {
@@ -846,7 +867,8 @@
             gridLayout.appendChild(timeCol);
 
             const daysWrapper = document.createElement('div'); daysWrapper.className = 'day-cols-wrapper';
-            daysWrapper.style.height = TOTAL_GRID_HEIGHT + 'px'; 
+            daysWrapper.style.height = totalGridPx + 'px'; 
+            daysWrapper.style.backgroundSize = `100% ${HOUR_HEIGHT}px`;
             
             let daysToRender =[];
             if (viewType === 'day') daysToRender.push(new Date(state.currentDate));
@@ -860,7 +882,7 @@
             daysToRender.forEach(dateObj => {
                 const dateStr = formatD(dateObj);
                 const col = document.createElement('div'); col.className = 'day-col';
-                col.style.height = TOTAL_GRID_HEIGHT + 'px';
+                col.style.height = totalGridPx + 'px';
                 
                 const wd = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                 const num = dateObj.getDate();
@@ -875,12 +897,13 @@
             gridLayout.appendChild(daysWrapper); viewContainer.appendChild(gridLayout);
             document.querySelectorAll('.day-col').forEach(layoutEventsInColumn);
 
-            if(!window.hasScrolled || state.view === 'day') {
+            if(!window.hasScrolled || window.lastScrolledView !== state.view) {
                 let earliest = 8 * 60; 
                 const todayEvents = state.events.filter(e => e.date === formatD(state.currentDate));
                 if(todayEvents.length > 0) earliest = Math.min(...todayEvents.map(e => e.startMins));
                 viewContainer.scrollTop = (Math.max(0, earliest - 60) / 60) * HOUR_HEIGHT; 
                 window.hasScrolled = true;
+                window.lastScrolledView = state.view;
             }
         }
 
@@ -919,20 +942,22 @@
 
         function createEventBlock(ev) {
             const el = document.createElement('div');
+            const pxHeight = Math.max(((SNAP_MINS / 60) * HOUR_HEIGHT), ((ev.durationMins / 60) * HOUR_HEIGHT));
             
             let sizeClass = '';
-            if (ev.durationMins <= 15) sizeClass = 'micro-event';
-            else if (ev.durationMins <= 30) sizeClass = 'short-event';
+            if (pxHeight <= 25) sizeClass = 'micro-event';
+            else if (pxHeight <= 45) sizeClass = 'short-event';
 
             el.className = `calendar-event color-${ev.color} ${ev.completed ? 'completed-task' : ''} ${sizeClass}`;
             el.draggable = true;
             
             const topPos = ((ev.startMins - (START_HOUR * 60)) / 60) * HOUR_HEIGHT;
             el.style.top = (topPos + HEADER_HEIGHT) + 'px'; 
-            el.style.height = Math.max(SNAP_PX, ((ev.durationMins / 60) * HOUR_HEIGHT)) + 'px';
+            el.style.height = pxHeight + 'px';
 
-            const lines = Math.max(1, Math.floor((ev.durationMins - 20) / 14));
-            const displayDesc = ev.durationMins >= 45 ? '-webkit-box' : 'none';
+            const availTextHeight = pxHeight - 28;
+            const lines = Math.max(1, Math.floor(availTextHeight / 14));
+            const displayDesc = pxHeight >= 55 ? '-webkit-box' : 'none';
 
             el.innerHTML = `
                 <div class="resizer top"></div>
@@ -971,18 +996,20 @@
                             ev.durationMins = newDur;
                         }
                         
-                        if (ev.durationMins <= 15) { el.classList.add('micro-event'); el.classList.remove('short-event'); } 
-                        else if (ev.durationMins <= 30) { el.classList.add('short-event'); el.classList.remove('micro-event'); } 
+                        const newPxHeight = (ev.durationMins / 60) * HOUR_HEIGHT;
+                        if (newPxHeight <= 25) { el.classList.add('micro-event'); el.classList.remove('short-event'); } 
+                        else if (newPxHeight <= 45) { el.classList.add('short-event'); el.classList.remove('micro-event'); } 
                         else { el.classList.remove('short-event', 'micro-event'); }
 
                         el.style.top = (((ev.startMins - (START_HOUR * 60)) / 60) * HOUR_HEIGHT + HEADER_HEIGHT) + 'px';
-                        el.style.height = ((ev.durationMins / 60) * HOUR_HEIGHT) + 'px';
+                        el.style.height = newPxHeight + 'px';
                         
                         el.querySelector('.event-time').innerText = `${formatTime(ev.startMins)} - ${formatTime(ev.startMins + ev.durationMins)} (${formatDurStr(ev.durationMins)})`;
                         const descEl = el.querySelector('.event-desc');
                         if (descEl) {
-                            const newLines = Math.max(1, Math.floor((ev.durationMins - 20) / 14));
-                            descEl.style.display = ev.durationMins >= 45 ? '-webkit-box' : 'none';
+                            const newAvail = newPxHeight - 28;
+                            const newLines = Math.max(1, Math.floor(newAvail / 14));
+                            descEl.style.display = newPxHeight >= 55 ? '-webkit-box' : 'none';
                             descEl.style.webkitLineClamp = newLines;
                         }
                     }
@@ -1045,8 +1072,9 @@
         function setupDropZone(column, dateStr, indicator) {
             column.addEventListener('dragover', e => {
                 e.preventDefault(); 
+                const snapPx = (SNAP_MINS / 60) * HOUR_HEIGHT;
                 const dropY = e.clientY - column.getBoundingClientRect().top - dragState.offsetY - HEADER_HEIGHT;
-                const snappedY = Math.max(0, Math.round(dropY / SNAP_PX) * SNAP_PX);
+                const snappedY = Math.max(0, Math.round(dropY / snapPx) * snapPx);
                 indicator.style.display = 'block'; indicator.style.top = (snappedY + HEADER_HEIGHT) + 'px';
                 indicator.setAttribute('data-time', formatTime((snappedY/HOUR_HEIGHT)*60));
                 column.classList.add('drag-over-active');
@@ -1054,8 +1082,9 @@
             column.addEventListener('dragleave', () => { indicator.style.display = 'none'; column.classList.remove('drag-over-active'); });
             column.addEventListener('drop', e => {
                 e.preventDefault(); indicator.style.display = 'none'; column.classList.remove('drag-over-active');
+                const snapPx = (SNAP_MINS / 60) * HOUR_HEIGHT;
                 const dropY = e.clientY - column.getBoundingClientRect().top - dragState.offsetY - HEADER_HEIGHT;
-                const startMins = Math.round(Math.max(0, Math.round(dropY / SNAP_PX) * SNAP_PX) / HOUR_HEIGHT * 60);
+                const startMins = Math.round(Math.max(0, Math.round(dropY / snapPx) * snapPx) / HOUR_HEIGHT * 60);
 
                 if (dragState.source === 'inbox') {
                     const idx = state.inbox.findIndex(t => t.id === dragState.id); const t = state.inbox[idx];
@@ -1203,6 +1232,7 @@
             toggleModalLocation(); toggleRepeatBox();
             document.getElementById('repeating-list-modal').classList.remove('active'); 
             document.getElementById('task-modal').classList.add('active');
+            document.getElementById('modal-title-input').focus();
         }
 
         function toggleModalLocation() { 
@@ -1256,7 +1286,7 @@
                 state.recurrences.push(rule);
                 
                 if(repeatTarget === 'calendar') {
-                    // Leave past events untouched, wipe future uncompleted ones so they can cleanly regenerate
+                    // Wipes future instances of rule only
                     state.events = state.events.filter(e => !(e.recurrenceId === recurrenceId && !e.completed && e.date >= dStr));
                     state.inbox = state.inbox.filter(t => !(t.recurrenceId === recurrenceId && !t.completed && (t.showDate||'') >= dStr));
                 } else {
@@ -1349,16 +1379,6 @@
             document.getElementById('repeating-list-modal').classList.add('active');
         }
 
-        function editRecurringRule(ruleId) {
-            let ev = state.events.find(e => e.recurrenceId === ruleId);
-            if(ev) openTaskModal(ev.id, 'calendar');
-            else {
-                let inboxTask = state.inbox.find(t => t.recurrenceId === ruleId);
-                if(inboxTask) openTaskModal(inboxTask.id, 'inbox');
-                else alert("Could not find an active instance of this task to edit.");
-            }
-        }
-
         function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
         function openShiftModal() { document.getElementById('shift-time-input').value = ""; document.getElementById('shift-modal').classList.add('active'); document.getElementById('shift-time-input').focus(); }
 
@@ -1371,7 +1391,7 @@
             let todayEvents = state.events.filter(e => e.date === todayStr && !e.completed);
             if(todayEvents.length > 0) {
                 todayEvents.sort((a,b) => a.startMins - b.startMins);
-                const diff = newStartMins - todayEvents[0].startMins;
+                const diff = newStartMins - todayEvents[0].startMins; // Can be positive (down) or negative (up)
                 todayEvents.forEach(e => { 
                     let newMins = e.startMins + diff; 
                     if(newMins >= 0 && newMins + e.durationMins <= 24*60) {
@@ -1394,6 +1414,13 @@
         const showScreenshot = localStorage.getItem('akiflow_screenshot') === 'true';
         document.getElementById('settings-screenshot-toggle').checked = showScreenshot;
         document.getElementById('btn-screenshot').style.display = showScreenshot ? 'inline-block' : 'none';
+        
+        // Init Slider UI to match storage
+        document.getElementById('settings-zoom-slider').value = HOUR_HEIGHT;
+        document.getElementById('main-zoom-slider').value = HOUR_HEIGHT;
+        const showZoom = localStorage.getItem('akiflow_show_zoom') === 'true';
+        document.getElementById('settings-show-zoom').checked = showZoom;
+        document.getElementById('main-zoom-slider').style.display = showZoom ? 'inline-block' : 'none';
         
         loadLocalData(); renderAll();
     </script>
