@@ -40,11 +40,10 @@
         }
 
         /* --- Accent Color Themes --- */
-        [data-accent="blue"] { --primary: #60a5fa; --primary-hover: #3b82f6; --indicator: #60a5fa; }
-        [data-accent="green"] { --primary: #34d399; --primary-hover: #10b981; --indicator: #34d399; }
-        [data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }[data-accent="gold"] { --primary: #fbbf24; --primary-hover: #f59e0b; --indicator: #fbbf24; }
+        [data-accent="blue"] { --primary: #60a5fa; --primary-hover: #3b82f6; --indicator: #60a5fa; }[data-accent="green"] { --primary: #34d399; --primary-hover: #10b981; --indicator: #34d399; }[data-accent="purple"] { --primary: #a78bfa; --primary-hover: #8b5cf6; --indicator: #a78bfa; }
+        [data-accent="gold"] { --primary: #fbbf24; --primary-hover: #f59e0b; --indicator: #fbbf24; }
 
-        /* --- Dynamic Colors --- */
+        /* --- Dynamic Colors (Translucent Style) --- */
         .color-0 { --c-trans-bg: rgba(59, 130, 246, 0.15); --c-solid-bg: #3b82f6; --c-trans-text: #2563eb; --c-solid-text: #ffffff; }
         .color-1 { --c-trans-bg: rgba(16, 185, 129, 0.15); --c-solid-bg: #10b981; --c-trans-text: #059669; --c-solid-text: #ffffff; }
         .color-2 { --c-trans-bg: rgba(245, 158, 11, 0.15); --c-solid-bg: #f59e0b; --c-trans-text: #d97706; --c-solid-text: #ffffff; }
@@ -97,15 +96,15 @@
         .drag-over-sidebar { background-color: rgba(128, 128, 128, 0.1) !important; border: 1px dashed var(--primary) !important; border-radius: 16px;}
 
         /* Unified Checkboxes */
-        .task-checkbox { min-width: 18px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--c-border, var(--c-solid-bg)); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative; pointer-events: auto;}
+        .task-checkbox { min-width: 18px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--c-solid-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative; pointer-events: auto;}
         .task-checkbox:hover { opacity: 0.7; }
-        .task-checkbox.checked { background: var(--c-border, var(--c-solid-bg)); border-color: var(--c-border, var(--c-solid-bg)); }
+        .task-checkbox.checked { background: var(--c-solid-bg); border-color: var(--c-solid-bg); }
         .task-checkbox.checked::after { content: '✓'; color: var(--bg-base); font-size: 10px; font-weight: 900; }
         
         .task-text { flex-grow: 1; pointer-events: none; word-wrap: break-word; line-height: 1.4;}
         .completed-task .task-text { text-decoration: line-through; opacity: 0.5; }
         
-        .subtask-badge { font-size: 0.65rem; background: var(--c-border, var(--c-solid-bg)); color: var(--bg-base); padding: 2px 6px; border-radius: 4px; opacity: 0.9; margin-left: 6px; font-weight: 700;}
+        .subtask-badge { font-size: 0.65rem; background: var(--c-solid-bg); color: var(--bg-base); padding: 2px 6px; border-radius: 4px; opacity: 0.9; margin-left: 6px; font-weight: 700;}
 
         /* --- Main Area & Header --- */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
@@ -137,9 +136,9 @@
         .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; transition: background 0.3s;}
         .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; transition: background 0.3s;}
 
-        /* --- Calendar Events --- */
-        .calendar-event { position: absolute; background-color: var(--c-solid-bg); border-radius: 6px; padding: 6px 8px; color: var(--c-solid-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, filter 0.2s; z-index: 5; display: flex; flex-direction: column;}
-        .calendar-event:hover { filter: brightness(1.1); }
+        /* --- Calendar Events (Translucent Style Restored) --- */
+        .calendar-event { position: absolute; background-color: var(--c-trans-bg); border-left: 3px solid var(--c-solid-bg); border-radius: 6px; padding: 4px 8px; color: var(--c-trans-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, border-color 0.2s; z-index: 5; display: flex; flex-direction: column;}
+        .calendar-event:hover { border-color: var(--border); }
         .calendar-event:active { cursor: grabbing; z-index: 50 !important; }
         .calendar-event.completed-task { opacity: 0.6; }
         
@@ -148,14 +147,8 @@
         .event-time { font-size: 0.65rem; font-weight: 600; opacity: 0.8; margin-bottom: 2px; }
         .event-title { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;}
         .event-desc { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; text-overflow: ellipsis; white-space: normal; word-wrap: break-word; line-height: 1.3; font-weight: 500;}
-        
-        /* Solid block checkboxes */
-        .calendar-event .task-checkbox { min-width: 16px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; margin-top: 1px; z-index: 20; position: relative;}
-        .calendar-event .task-checkbox:hover { background: rgba(255,255,255,0.2); }
-        .calendar-event .task-checkbox.checked { background: #ffffff; border-color: #ffffff; }
-        .calendar-event .task-checkbox.checked::after { content: '✓'; color: var(--c-solid-bg); font-size: 10px; font-weight: 900; }
 
-        /* Responsive Layouts based on actual PIXEL height */
+        /* Layouts for small blocks */
         .calendar-event.short-event { padding: 4px 8px; }
         .calendar-event.short-event .event-header { margin-top: 0; align-items: center; }
         .calendar-event.short-event .event-details { flex-direction: row; align-items: center; gap: 8px; }
@@ -173,17 +166,15 @@
         .resizer { position: absolute; left: 0; right: 0; height: 12px; display: flex; justify-content: center; align-items: center; z-index: 10; }
         .resizer.bottom { bottom: -4px; cursor: ns-resize; }
         .resizer.top { top: -4px; cursor: ns-resize; }
-        .resizer::after { content: ''; width: 30px; height: 4px; background-color: rgba(255,255,255,0.7); border-radius: 2px; opacity: 0; transition: 0.2s;}
-        .calendar-event:hover .resizer::after { opacity: 1; }
+        .resizer::after { content: ''; width: 30px; height: 4px; background-color: var(--c-solid-bg); border-radius: 2px; opacity: 0; transition: 0.2s;}
+        .calendar-event:hover .resizer::after { opacity: 0.6; }
 
         /* --- Month View --- */
         .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(110px, 1fr); flex-grow: 1; background: var(--border); gap: 1px; }
         .month-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-panel); text-align: center; font-weight: 500; font-size: 0.85rem; padding: 15px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
         .month-cell { background: var(--bg-panel); padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
         .month-cell-date { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 5px; padding-left: 4px; }
-        .month-event { background-color: var(--c-solid-bg); color: var(--c-solid-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
-        .month-event .task-checkbox { min-width: 12px; width: 12px; height: 12px; border: 1px solid rgba(255,255,255,0.7); border-radius: 50%; }
-        .month-event .task-checkbox.checked { background: white; }
+        .month-event { background-color: var(--c-trans-bg); color: var(--c-trans-text); font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border-left: 3px solid var(--c-solid-bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: grab; font-weight: 500; display: flex; align-items: center; gap: 6px;}
         .drag-over-active { background-color: rgba(128, 128, 128, 0.1) !important; }
 
         /* --- Modals --- */
@@ -198,7 +189,6 @@
         
         .row { display: flex; gap: 12px; align-items: flex-start; }
         .row > * { flex: 1; }
-        
         .modal-actions { display: flex; justify-content: space-between; margin-top: 10px; }
         
         .repeat-box { background: var(--bg-base); padding: 15px; border-radius: 10px; border: 1px solid var(--border); display: none; flex-direction: column; gap: 12px;}
@@ -240,7 +230,7 @@
         .exp-time-col { width: 75px; text-align: right; flex-shrink: 0; padding-top: 2px; }
         .exp-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
         .exp-dur { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-        .exp-card { flex-grow: 1; background: var(--c-solid-bg); padding: 12px 14px; border-radius: 10px; color: var(--c-solid-text); box-shadow: var(--shadow); }
+        .exp-card { flex-grow: 1; background: var(--c-trans-bg); border-left: 4px solid var(--c-solid-bg); padding: 12px 14px; border-radius: 10px; color: var(--c-trans-text); box-shadow: var(--shadow); }
         .exp-card-title { font-weight: 600; font-size: 0.9rem; line-height: 1.4; display: flex; justify-content: space-between;}
         .exp-card-desc { font-size: 0.75rem; opacity: 0.85; font-weight: 500; margin-top: 6px; white-space: pre-wrap; line-height: 1.4;}
     </style>
@@ -270,11 +260,10 @@
                 </div>
                 <div style="width: 10px;"></div>
                 
-                <!-- Main Zoom Slider -->
                 <input type="range" id="main-zoom-slider" min="40" max="240" step="10" oninput="updateZoom(this.value)" style="display:none; width: 80px;" title="Vertical Zoom">
                 
                 <button class="btn-outline" onclick="openRepeatingListModal()">🔁 Manage Repeating</button>
-                <button class="btn-outline" onclick="openShiftModal()">✨ Shift Schedule</button>
+                <button class="btn-outline" onclick="openShiftModal()" title="Shift Tasks Down">✨ Shift Schedule</button>
                 <button class="btn-outline" id="btn-screenshot" onclick="generateDayScreenshot()" style="display:none;">📸 Screenshot</button>
                 <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
             </div>
@@ -298,7 +287,7 @@
             </div>
 
             <div class="modal-actions" style="justify-content: center; gap: 10px;">
-                <button class="btn-outline" style="border-color:transparent;" onclick="closeModals()">Close</button>
+                <button class="btn-outline" style="border-color:transparent;" onclick="document.getElementById('screenshot-modal').classList.remove('active')">Close</button>
                 <button class="btn-outline" onclick="downloadScreenshot()">📥 Download</button>
                 <button class="btn-primary" id="btn-copy-screenshot" onclick="copyScreenshot()">📋 Copy Image</button>
             </div>
@@ -540,9 +529,9 @@
         let state = {
             view: 'day', 
             currentDate: new Date(),
-            inbox:[], // { id, text, completed, showDate, recurrenceId, color, description, subtasks }
-            events:[], // { id, text, date, startMins, durationMins, completed, recurrenceId, color, description, subtasks }
-            recurrences:[] // { id, text, frequency, interval, daysOfWeek[], target, startMins, durationMins, color, startDate, description, subtasks }
+            inbox:[], 
+            events:[], 
+            recurrences:[] 
         };
         let fileHandle = null;
         let currentModalSubtasks =[];
@@ -698,16 +687,16 @@
             document.getElementById('btn-screenshot').style.display = isEnabled ? 'inline-block' : 'none';
         }
 
-        // --- 5. Repeating Engine (Smart Horizon) ---
+        // --- 5. Repeating Engine (Smart Horizon & History Preserving) ---
         function maintainRepeats() {
             const todayStr = formatD(new Date());
             const horizonDate = new Date(); horizonDate.setDate(horizonDate.getDate() + 365);
             const horizonStr = formatD(horizonDate);
 
             state.recurrences.forEach(rule => {
-                const freshSubtasks = (rule.subtasks ||[]).map(s => ({ ...s, completed: false })); 
+                const freshSubtasks = (rule.subtasks ||[]).map(s => ({ ...s, completed: false }));
 
-                if(rule.target === 'sidebar') {
+                if (rule.target === 'sidebar') {
                     if (!rule.lastGeneratedDate) rule.lastGeneratedDate = todayStr;
                     let[y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
                     let nextDate = new Date(y, m - 1, d);
@@ -721,26 +710,44 @@
 
                     if (todayStr >= nextDateStr && !hasActive) {
                         state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: todayStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
-                        rule.lastGeneratedDate = todayStr; 
-                    } else if (todayStr === rule.lastGeneratedDate && !hasActive) {
-                        state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: todayStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
+                        rule.lastGeneratedDate = todayStr;
                     }
-                } else if(rule.target === 'calendar') {
-                    if(!rule.lastGeneratedDate) rule.lastGeneratedDate = todayStr;
-                    let[y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
-                    let lastGenDate = new Date(y, m - 1, d); 
+                } else if (rule.target === 'calendar') {
+                    if (!rule.lastGeneratedDate) rule.lastGeneratedDate = rule.startDate || todayStr;
+                    let [y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
+                    let lastGenDate = new Date(y, m - 1, d);
 
-                    let iterations = 0; 
-                    while(formatD(lastGenDate) < horizonStr && iterations < 400) {
-                        if(rule.frequency === 'days') lastGenDate.setDate(lastGenDate.getDate() + rule.interval);
-                        else if(rule.frequency === 'weeks') lastGenDate.setDate(lastGenDate.getDate() + (rule.interval * 7));
-                        else if(rule.frequency === 'months') lastGenDate.setMonth(lastGenDate.getMonth() + rule.interval);
-
+                    let iterations = 0;
+                    while (formatD(lastGenDate) < horizonStr && iterations < 400) {
+                        lastGenDate.setDate(lastGenDate.getDate() + 1); 
                         let dStr = formatD(lastGenDate);
-                        if(dStr <= horizonStr) {
-                            state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
-                            rule.lastGeneratedDate = dStr;
+                        if (dStr > horizonStr) break;
+
+                        let isMatch = false;
+
+                        if (rule.frequency === 'days') {
+                            let start = new Date(rule.startDate);
+                            let diffDays = Math.round((lastGenDate - start) / (1000 * 60 * 60 * 24));
+                            if (diffDays % rule.interval === 0) isMatch = true;
+                        } else if (rule.frequency === 'weeks') {
+                            let start = new Date(rule.startDate);
+                            let startWeek = new Date(start); startWeek.setDate(start.getDate() - start.getDay());
+                            let currentWeek = new Date(lastGenDate); currentWeek.setDate(lastGenDate.getDate() - lastGenDate.getDay());
+                            
+                            let diffWeeks = Math.round((currentWeek - startWeek) / (1000 * 60 * 60 * 24 * 7));
+                            if (diffWeeks % rule.interval === 0) {
+                                if (rule.daysOfWeek && rule.daysOfWeek.includes(lastGenDate.getDay())) isMatch = true;
+                            }
+                        } else if (rule.frequency === 'months') {
+                            let start = new Date(rule.startDate);
+                            let diffMonths = (lastGenDate.getFullYear() - start.getFullYear()) * 12 + (lastGenDate.getMonth() - start.getMonth());
+                            if (diffMonths % rule.interval === 0 && lastGenDate.getDate() === start.getDate()) isMatch = true;
                         }
+
+                        if (isMatch) {
+                            state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
+                        }
+                        rule.lastGeneratedDate = dStr; 
                         iterations++;
                     }
                 }
@@ -1286,7 +1293,7 @@
                 state.recurrences.push(rule);
                 
                 if(repeatTarget === 'calendar') {
-                    // Wipes future instances of rule only
+                    // Leave past events untouched, wipe future uncompleted ones so they can cleanly regenerate
                     state.events = state.events.filter(e => !(e.recurrenceId === recurrenceId && !e.completed && e.date >= dStr));
                     state.inbox = state.inbox.filter(t => !(t.recurrenceId === recurrenceId && !t.completed && (t.showDate||'') >= dStr));
                 } else {
@@ -1391,7 +1398,7 @@
             let todayEvents = state.events.filter(e => e.date === todayStr && !e.completed);
             if(todayEvents.length > 0) {
                 todayEvents.sort((a,b) => a.startMins - b.startMins);
-                const diff = newStartMins - todayEvents[0].startMins; // Can be positive (down) or negative (up)
+                const diff = newStartMins - todayEvents[0].startMins;
                 todayEvents.forEach(e => { 
                     let newMins = e.startMins + diff; 
                     if(newMins >= 0 && newMins + e.durationMins <= 24*60) {
