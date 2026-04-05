@@ -136,7 +136,7 @@
         .drag-indicator { position: absolute; left: 0; right: 0; height: 2px; background-color: var(--indicator); pointer-events: none; display: none; z-index: 20; transition: background 0.3s;}
         .drag-indicator::before { content: attr(data-time); position: absolute; left: -65px; top: -10px; background: var(--indicator); color: #111; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; transition: background 0.3s;}
 
-        /* --- Calendar Events (Translucent Style Restored) --- */
+        /* --- Calendar Events --- */
         .calendar-event { position: absolute; background-color: var(--c-trans-bg); border-left: 3px solid var(--c-solid-bg); border-radius: 6px; padding: 4px 8px; color: var(--c-trans-text); overflow: hidden; cursor: grab; transition: width 0.2s, left 0.2s, border-color 0.2s; z-index: 5; display: flex; flex-direction: column;}
         .calendar-event:hover { border-color: var(--border); }
         .calendar-event:active { cursor: grabbing; z-index: 50 !important; }
@@ -194,7 +194,6 @@
         .repeat-box { background: var(--bg-base); padding: 15px; border-radius: 10px; border: 1px solid var(--border); display: none; flex-direction: column; gap: 12px;}
         .repeat-box.active { display: flex; }
 
-        /* Custom Checkboxes for Days of Week */
         .dow-label { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .dow-check { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
 
@@ -430,8 +429,10 @@
             <div class="modal-title">Repeating Tasks</div>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Click any rule below to edit schedule.</p>
             <div id="recurring-list" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top:10px;"></div>
-            <div class="modal-actions" style="justify-content: flex-end;">
-                <button class="btn-outline" onclick="closeModals()">Done</button>
+            
+            <div class="modal-actions" style="justify-content: space-between; align-items: center; margin-top: 15px;">
+                <button class="btn-outline" onclick="resetViewedDateRecurrences()" title="Check and restore any missing recurring tasks for the currently viewed date">🔄 Check Current Date</button>
+                <button class="btn-primary" onclick="closeModals()">Done</button>
             </div>
         </div>
     </div>
@@ -583,6 +584,33 @@
             return `<span class="subtask-badge">✓ ${completed}/${task.subtasks.length}</span>`;
         }
 
+        // Shared Date Rule Matcher for the Recurrence Engine
+        function isRuleMatchForDate(rule, targetDateStr) {
+            let start = new Date(rule.startDate);
+            let target = new Date(targetDateStr);
+            if (target < start) return false;
+
+            start.setHours(0,0,0,0);
+            target.setHours(0,0,0,0);
+
+            if (rule.frequency === 'days') {
+                let diffDays = Math.round((target - start) / (1000 * 60 * 60 * 24));
+                return diffDays >= 0 && diffDays % rule.interval === 0;
+            } else if (rule.frequency === 'weeks') {
+                let startWeek = new Date(start); startWeek.setDate(start.getDate() - start.getDay());
+                let targetWeek = new Date(target); targetWeek.setDate(target.getDate() - target.getDay());
+                let diffWeeks = Math.round((targetWeek - startWeek) / (1000 * 60 * 60 * 24 * 7));
+                if (diffWeeks >= 0 && diffWeeks % rule.interval === 0) {
+                    return rule.daysOfWeek && rule.daysOfWeek.includes(target.getDay());
+                }
+                return false;
+            } else if (rule.frequency === 'months') {
+                let diffMonths = (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth());
+                return diffMonths >= 0 && diffMonths % rule.interval === 0 && target.getDate() === start.getDate();
+            }
+            return false;
+        }
+
         // --- 3. Database / Storage ---
         function loadLocalData() {
             const saved = localStorage.getItem('akiflow_ultimate');
@@ -595,9 +623,14 @@
                 state.inbox =[{ id: genId(), text: "Unstructured idea", completed: false, color: 0, description: '', subtasks: [] }];
                 state.events =[{ id: genId(), text: "Deep Work Session", date: formatD(new Date()), startMins: 540, durationMins: 90, completed: false, color: 1, description: 'Focus on coding.', subtasks: [] }];
             }
+            
+            // Backwards compatibility normalization
             state.inbox.forEach(t => { if(t.color === undefined) t.color = Math.floor(Math.random()*6); if(t.description === undefined) t.description = ''; if(t.subtasks === undefined) t.subtasks =[]; });
             state.events.forEach(t => { if(t.color === undefined) t.color = Math.floor(Math.random()*6); if(t.description === undefined) t.description = ''; if(t.subtasks === undefined) t.subtasks =[]; });
-            state.recurrences.forEach(r => { if(r.daysOfWeek === undefined) r.daysOfWeek =[]; if(!r.startDate && r.lastGeneratedDate) r.startDate = r.lastGeneratedDate; });
+            state.recurrences.forEach(r => { 
+                if(r.daysOfWeek === undefined) r.daysOfWeek =[]; 
+                if(!r.startDate) r.startDate = r.lastGeneratedDate || formatD(new Date()); 
+            });
         }
         
         async function saveLocalData() {
@@ -687,71 +720,77 @@
             document.getElementById('btn-screenshot').style.display = isEnabled ? 'inline-block' : 'none';
         }
 
-        // --- 5. Repeating Engine (Smart Horizon & History Preserving) ---
+        // --- 5. Repeating Engine (Fully Unified & Robust) ---
         function maintainRepeats() {
-            const todayStr = formatD(new Date());
-            const horizonDate = new Date(); horizonDate.setDate(horizonDate.getDate() + 365);
+            const horizonDate = new Date(state.currentDate);
+            horizonDate.setDate(horizonDate.getDate() + 365); // 1 year horizon from currently viewed date
             const horizonStr = formatD(horizonDate);
 
             state.recurrences.forEach(rule => {
-                const freshSubtasks = (rule.subtasks ||[]).map(s => ({ ...s, completed: false }));
+                const freshSubtasks = (rule.subtasks || []).map(s => ({ ...s, completed: false }));
+                if (!rule.startDate) rule.startDate = formatD(new Date());
+                
+                // Ensure the generation cursor is never null and is at least the starting date
+                if (!rule.lastGeneratedDate || rule.lastGeneratedDate < rule.startDate) {
+                    rule.lastGeneratedDate = rule.startDate;
+                }
 
-                if (rule.target === 'sidebar') {
-                    if (!rule.lastGeneratedDate) rule.lastGeneratedDate = todayStr;
-                    let[y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
-                    let nextDate = new Date(y, m - 1, d);
+                let currentEval = new Date(rule.lastGeneratedDate);
+                let iterations = 0;
 
-                    if (rule.frequency === 'days') nextDate.setDate(nextDate.getDate() + rule.interval);
-                    else if (rule.frequency === 'weeks') nextDate.setDate(nextDate.getDate() + (rule.interval * 7));
-                    else if (rule.frequency === 'months') nextDate.setMonth(nextDate.getMonth() + rule.interval);
+                while (formatD(currentEval) <= horizonStr && iterations < 400) {
+                    let dStr = formatD(currentEval);
+                    
+                    if (isRuleMatchForDate(rule, dStr)) {
+                        let hasEvent = state.events.some(e => e.recurrenceId === rule.id && e.date === dStr);
+                        let hasInbox = state.inbox.some(t => t.recurrenceId === rule.id && t.showDate === dStr);
 
-                    const nextDateStr = formatD(nextDate);
-                    const hasActive = state.inbox.some(t => t.recurrenceId === rule.id && !t.completed) || state.events.some(e => e.recurrenceId === rule.id && !e.completed);
-
-                    if (todayStr >= nextDateStr && !hasActive) {
-                        state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: todayStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
-                        rule.lastGeneratedDate = todayStr;
-                    }
-                } else if (rule.target === 'calendar') {
-                    if (!rule.lastGeneratedDate) rule.lastGeneratedDate = rule.startDate || todayStr;
-                    let [y, m, d] = rule.lastGeneratedDate.split('-').map(Number);
-                    let lastGenDate = new Date(y, m - 1, d);
-
-                    let iterations = 0;
-                    while (formatD(lastGenDate) < horizonStr && iterations < 400) {
-                        lastGenDate.setDate(lastGenDate.getDate() + 1); 
-                        let dStr = formatD(lastGenDate);
-                        if (dStr > horizonStr) break;
-
-                        let isMatch = false;
-
-                        if (rule.frequency === 'days') {
-                            let start = new Date(rule.startDate);
-                            let diffDays = Math.round((lastGenDate - start) / (1000 * 60 * 60 * 24));
-                            if (diffDays % rule.interval === 0) isMatch = true;
-                        } else if (rule.frequency === 'weeks') {
-                            let start = new Date(rule.startDate);
-                            let startWeek = new Date(start); startWeek.setDate(start.getDate() - start.getDay());
-                            let currentWeek = new Date(lastGenDate); currentWeek.setDate(lastGenDate.getDate() - lastGenDate.getDay());
-                            
-                            let diffWeeks = Math.round((currentWeek - startWeek) / (1000 * 60 * 60 * 24 * 7));
-                            if (diffWeeks % rule.interval === 0) {
-                                if (rule.daysOfWeek && rule.daysOfWeek.includes(lastGenDate.getDay())) isMatch = true;
+                        // Generate it explicitly for this date if it hasn't been placed/handled
+                        if (!hasEvent && !hasInbox) {
+                            if (rule.target === 'calendar') {
+                                state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
+                            } else {
+                                state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: dStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
                             }
-                        } else if (rule.frequency === 'months') {
-                            let start = new Date(rule.startDate);
-                            let diffMonths = (lastGenDate.getFullYear() - start.getFullYear()) * 12 + (lastGenDate.getMonth() - start.getMonth());
-                            if (diffMonths % rule.interval === 0 && lastGenDate.getDate() === start.getDate()) isMatch = true;
                         }
+                    }
+                    
+                    rule.lastGeneratedDate = dStr;
+                    currentEval.setDate(currentEval.getDate() + 1);
+                    iterations++;
+                }
+            });
+        }
 
-                        if (isMatch) {
+        // Requested button function to explicitly rescan the currently viewed date and respawn missing tasks
+        function resetViewedDateRecurrences() {
+            const dStr = formatD(state.currentDate);
+            let restored = 0;
+            
+            state.recurrences.forEach(rule => {
+                if (isRuleMatchForDate(rule, dStr)) {
+                    let hasEvent = state.events.some(e => e.recurrenceId === rule.id && e.date === dStr);
+                    let hasInbox = state.inbox.some(t => t.recurrenceId === rule.id && t.showDate === dStr);
+                    
+                    if (!hasEvent && !hasInbox) {
+                        const freshSubtasks = (rule.subtasks || []).map(s => ({ ...s, completed: false }));
+                        if (rule.target === 'calendar') {
                             state.events.push({ id: genId(), text: rule.text, date: dStr, startMins: rule.startMins, durationMins: rule.durationMins, completed: false, recurrenceId: rule.id, color: rule.color, description: rule.description, subtasks: freshSubtasks });
+                        } else {
+                            state.inbox.push({ id: genId(), text: rule.text, completed: false, recurrenceId: rule.id, showDate: dStr, color: rule.color, description: rule.description, subtasks: freshSubtasks });
                         }
-                        rule.lastGeneratedDate = dStr; 
-                        iterations++;
+                        restored++;
                     }
                 }
             });
+
+            if (restored > 0) {
+                saveLocalData();
+                renderAll();
+                alert(`Checked! ${restored} missing repeating task(s) were restored to your schedule for ${dStr}.`);
+            } else {
+                alert(`Checked! All scheduled repeating tasks for ${dStr} are already present.`);
+            }
         }
 
         // --- 6. Screenshot Engine ---
@@ -835,8 +874,18 @@
 
         function renderInbox() {
             const list = document.getElementById('inbox-list'); list.innerHTML = '';
-            const todayStr = formatD(new Date());
-            let visibleInbox = state.inbox.filter(t => !t.showDate || t.showDate <= todayStr);
+            const viewedDateStr = formatD(state.currentDate);
+            
+            let visibleInbox = state.inbox.filter(t => {
+                if (t.recurrenceId) {
+                    // 1) Sidebar repeating tasks are DAY SPECIFIC. They only appear on their EXACT generated date.
+                    return t.showDate === viewedDateStr;
+                } else {
+                    // 2) Standard unscheduled ideas appear globally (or up until viewedDate if they have a showDate constraint)
+                    return !t.showDate || t.showDate <= viewedDateStr;
+                }
+            });
+            
             visibleInbox.sort((a,b) => a.completed - b.completed); 
 
             visibleInbox.forEach(task => {
